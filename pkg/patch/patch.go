@@ -125,26 +125,43 @@ func normalizeConfigForPlatform(j []byte, p *types.PatchPlatform) ([]byte, error
 // Patch command applies package updates to an OCI image given a vulnerability report.
 func Patch(
 	ctx context.Context, timeout time.Duration,
-	image, reportFile, reportDirectory, platformSpecificErrors, patchedTag, suffix, workingFolder, scanner, format, output string,
+	image, reportFile, reportDirectory, platformSpecificErrors, patchedTag, suffix, workingFolder, scanner, format, output string, outputFile string,
 	ignoreError, push bool,
 	bkOpts buildkit.Opts,
 ) error {
 	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
-
+	startTime := time.Now().Format(time.RFC3339)
 	ch := make(chan error)
 	go func() {
-		ch <- patchWithContext(timeoutCtx, ch, image, reportFile, reportDirectory, platformSpecificErrors, patchedTag, suffix, workingFolder, scanner, format, output, ignoreError, push, bkOpts)
+		ch <- patchWithContext(timeoutCtx, ch, image, reportFile, reportDirectory, platformSpecificErrors, patchedTag, suffix, workingFolder, scanner, format, output, outputFile, ignoreError, push, bkOpts)
 	}()
-
+	
+	var patchedImageName string
+	var patchedImageDigest string
+	var patchStatus = "failed"
+	var patchMessage error
+	endTime := time.Now().Format(time.RFC3339)
 	select {
 	case err := <-ch:
+		if err != nil && outputFile != "" {
+			patchMessage = err
+			newImageDetails := NewImageDetails("local", patchedImageName, patchedImageDigest)
+			newLineAjeOutput := NewLineAjeOutput("v1", patchStatus, patchMessage, newImageDetails, []types.PatchDetail{}, []types.FailedPatch{}, "v1.2.3", startTime, endTime, "scanner-v2.4")
+			WriteLineAjeOutput(&newLineAjeOutput, outputFile)
+		}
 		return err
 	case <-timeoutCtx.Done():
 		// add a grace period for long running deferred cleanup functions to complete
 		<-time.After(1 * time.Second)
 
 		err := fmt.Errorf("patch exceeded timeout %v", timeout)
+		if err != nil && outputFile != "" {
+			patchMessage = err
+			newImageDetails := NewImageDetails("local", patchedImageName, patchedImageDigest)
+			newLineAjeOutput := NewLineAjeOutput("v1", patchStatus, patchMessage, newImageDetails, []types.PatchDetail{}, []types.FailedPatch{}, "v1.2.3", startTime, endTime, "scanner-v2.4")
+			WriteLineAjeOutput(&newLineAjeOutput, outputFile)
+		}
 		log.Error(err)
 		return err
 	}
@@ -162,7 +179,7 @@ func removeIfNotDebug(workingFolder string) {
 func patchWithContext(
 	ctx context.Context,
 	ch chan error,
-	image, reportFile, reportDirectory, platformSpecificErrors, patchedTag, suffix, workingFolder, scanner, format, output string,
+	image, reportFile, reportDirectory, platformSpecificErrors, patchedTag, suffix, workingFolder, scanner, format, output string, outputFile string,
 	ignoreError, push bool,
 	bkOpts buildkit.Opts,
 ) error {
@@ -170,6 +187,7 @@ func patchWithContext(
 		return fmt.Errorf("both report file and directory provided, please provide only one")
 	}
 
+	startTime := time.Now().Format(time.RFC3339)
 	// try report file
 	if reportFile != "" {
 		// check if reportFile exists
@@ -195,10 +213,26 @@ func patchWithContext(
 		if platform.OS != LINUX {
 			platform.OS = LINUX
 		}
-		result, err := patchSingleArchImage(ctx, ch, image, reportFile, patchedTag, suffix, workingFolder, scanner, format, output, platform, ignoreError, push, bkOpts, false)
+		result, patchesApplied, patchesFailed, err := patchSingleArchImage(ctx, ch, image, reportFile, patchedTag, suffix, workingFolder, scanner, format, output, platform, ignoreError, push, bkOpts, false)
+		endTime := time.Now().Format(time.RFC3339)
+		var patchedImageName string
+		var patchedImageDigest string
+		var patchStatus = "failed"
+		var patchMessage = err
 		if err == nil && result != nil {
+			patchStatus = "success"
+			patchMessage = fmt.Errorf("")
+			patchedImageName = result.PatchedRef.String()
+			patchedImageDigest = result.PatchedImageDigest
 			log.Infof("Patched image (%s): %s\n", platform.OS+"/"+platform.Architecture, result.PatchedRef.String())
 		}
+
+		if outputFile != "" {
+			newImageDetails := NewImageDetails("local", patchedImageName, patchedImageDigest)
+			newLineAjeOutput := NewLineAjeOutput("v1", patchStatus, patchMessage, newImageDetails, patchesApplied, patchesFailed, "v1.2.3", startTime, endTime, "scanner-v2.4")
+			WriteLineAjeOutput(&newLineAjeOutput, outputFile)
+		}
+
 		return err
 	} else if reportDirectory == "" && reportFile == "" {
 		platform := types.PatchPlatform{
@@ -207,10 +241,25 @@ func patchWithContext(
 		if platform.OS != LINUX {
 			platform.OS = LINUX
 		}
-		result, err := patchSingleArchImage(ctx, ch, image, reportFile, patchedTag, suffix, workingFolder, scanner, format, output, platform, ignoreError, push, bkOpts, false)
+		result, patchesApplied, patchesFailed, err := patchSingleArchImage(ctx, ch, image, reportFile, patchedTag, suffix, workingFolder, scanner, format, output, platform, ignoreError, push, bkOpts, false)
+		endTime := time.Now().Format(time.RFC3339)
+		var patchedImageName string
+		var patchedImageDigest string
+		var patchStatus = "failed"
+		var patchMessage = err
 		if err == nil && result != nil && result.PatchedRef != nil {
-			log.Infof("Patched image (%s): %s\n", platform.OS+"/"+platform.Architecture, result.PatchedRef)
+			patchStatus = "success"
+			patchedImageName = result.PatchedRef.String()
+			patchedImageDigest = result.PatchedImageDigest
+			log.Infof("Patched image (%s): %s\n", platform.OS+"/"+platform.Architecture, result.PatchedRef.String())
 		}
+
+		if outputFile != "" {
+			newImageDetails := NewImageDetails("local", patchedImageName, patchedImageDigest)
+			newLineAjeOutput := NewLineAjeOutput("v1", patchStatus, patchMessage, newImageDetails, patchesApplied, patchesFailed, "v1.2.3", startTime, endTime, "scanner-v2.4")
+			WriteLineAjeOutput(&newLineAjeOutput, outputFile)
+		}
+
 		return err
 	}
 
@@ -223,7 +272,7 @@ func patchWithContext(
 		return fmt.Errorf("provided report directory path %s is not a directory", reportDirectory)
 	}
 
-	return patchMultiArchImage(ctx, ch, platformSpecificErrors, image, reportDirectory, patchedTag, suffix, workingFolder, scanner, format, output, ignoreError, push, bkOpts)
+	return patchMultiArchImage(ctx, ch, platformSpecificErrors, image, reportDirectory, patchedTag, suffix, workingFolder, scanner, format, output, outputFile, ignoreError, push, bkOpts)
 }
 
 func patchSingleArchImage(
@@ -235,7 +284,7 @@ func patchSingleArchImage(
 	ignoreError, push bool,
 	bkOpts buildkit.Opts,
 	multiArch bool,
-) (*types.PatchResult, error) {
+) (*types.PatchResult, []types.PatchDetail, []types.FailedPatch, error) {
 	if reportFile == "" && output != "" {
 		log.Warn("No vulnerability report was provided, so no VEX output will be generated.")
 	}
@@ -256,7 +305,7 @@ func patchSingleArchImage(
 			// check if emulation is enabled
 
 			if emulationEnabled := buildkit.QemuAvailable(&targetPlatform); !emulationEnabled {
-				return nil, fmt.Errorf("emulation is not enabled for platform %s", targetPlatform.OS+"/"+targetPlatform.Architecture)
+				return nil, nil, nil, fmt.Errorf("emulation is not enabled for platform %s", targetPlatform.OS+"/"+targetPlatform.Architecture)
 			}
 			log.Debugf("Emulation is enabled for platform %+v", targetPlatform)
 		}
@@ -265,13 +314,13 @@ func patchSingleArchImage(
 	// parse the image reference
 	imageName, err := reference.ParseNormalizedNamed(image)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse reference: %w", err)
+		return nil, nil, nil, fmt.Errorf("failed to parse reference: %w", err)
 	}
 
 	// resolve final patched tag
 	patchedTag, err = resolvePatchedTag(imageName, patchedTag, suffix)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 	if multiArch {
 		patchedTag = archTag(patchedTag, targetPlatform.Architecture, targetPlatform.Variant)
@@ -284,16 +333,16 @@ func patchSingleArchImage(
 		var err error
 		workingFolder, err = os.MkdirTemp("", "copa-*")
 		if err != nil {
-			return nil, err
+			return nil, nil, nil, err
 		}
 		defer removeIfNotDebug(workingFolder)
 		if err = os.Chmod(workingFolder, 0o744); err != nil {
-			return nil, err
+			return nil, nil, nil, err
 		}
 	} else {
 		if isNew, err := utils.EnsurePath(workingFolder, 0o744); err != nil {
 			log.Errorf("failed to create workingFolder %s", workingFolder)
-			return nil, err
+			return nil, nil, nil, err
 		} else if isNew {
 			defer removeIfNotDebug(workingFolder)
 		}
@@ -304,14 +353,14 @@ func patchSingleArchImage(
 	if reportFile != "" {
 		updates, err = report.TryParseScanReport(reportFile, scanner)
 		if err != nil {
-			return nil, err
+			return nil, nil, nil, err
 		}
 		log.Debugf("updates to apply: %v", updates)
 	}
 
 	bkClient, err := bkNewClient(ctx, bkOpts)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 	defer bkClient.Close()
 
@@ -378,7 +427,7 @@ func patchSingleArchImage(
 	}
 	solveOpt.SourcePolicy, err = build.ReadSourcePolicy()
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	if solveOpt.SourcePolicy != nil {
@@ -386,19 +435,23 @@ func patchSingleArchImage(
 		case strings.Contains(solveOpt.SourcePolicy.Rules[0].Updates.Identifier, "redhat"):
 			err = errors.New("RedHat is not supported via source policies due to BusyBox not being in the RHEL repos\n" +
 				"Please use a different RPM-based image")
-			return nil, err
+			return nil, nil, nil, err
 
 		case strings.Contains(solveOpt.SourcePolicy.Rules[0].Updates.Identifier, "rockylinux"):
 			err = errors.New("RockyLinux is not supported via source policies due to BusyBox not being in the RockyLinux repos\n" +
 				"Please use a different RPM-based image")
-			return nil, err
+			return nil, nil, nil, err
 
 		case strings.Contains(solveOpt.SourcePolicy.Rules[0].Updates.Identifier, "alma"):
 			err = errors.New("AlmaLinux is not supported via source policies due to BusyBox not being in the AlmaLinux repos\n" +
 				"Please use a different RPM-based image")
-			return nil, err
+			return nil, nil, nil, err
 		}
 	}
+
+	var patchesApplied []types.PatchDetail 
+	var patchesFailed []types.FailedPatch
+	var patchedImageDigest string
 
 	// Create a channel to receive the patched image digest
 	buildChannel := make(chan *client.SolveStatus)
@@ -429,7 +482,6 @@ func patchSingleArchImage(
 				ch <- err
 				return nil, err
 			}
-
 			// Create package manager helper
 			var manager pkgmgr.PackageManager
 			if reportFile == "" {
@@ -491,10 +543,13 @@ func patchSingleArchImage(
 			}
 
 			// Export the patched image state to Docker
-			patchedImageState, errPkgs, err := manager.InstallUpdates(ctx, updates, ignoreError)
-			if err != nil {
-				ch <- err
-				return nil, err
+			var patchedImageState *llb.State
+			var errPkgs []string
+			var installError error
+			patchedImageState, errPkgs, patchesApplied, patchesFailed, installError = manager.InstallUpdates(ctx, updates, ignoreError)
+			if installError != nil {
+				ch <- installError
+				return nil, installError
 			}
 
 			def, err := patchedImageState.Marshal(ctx, llb.Platform(targetPlatform.Platform))
@@ -533,7 +588,6 @@ func patchSingleArchImage(
 		}, buildChannel)
 
 		// Currently can only validate updates if updating via scanner
-		var patchedImageDigest string
 		if err == nil && solveResponse != nil {
 			digest := solveResponse.ExporterResponse[exptypes.ExporterImageDigestKey]
 			patchedImageDigest = digest
@@ -592,7 +646,7 @@ func patchSingleArchImage(
 
 	err = eg.Wait()
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	patchedDesc, err := utils.GetImageDescriptor(context.Background(), patchedImageName)
@@ -604,14 +658,15 @@ func patchSingleArchImage(
 	patchedRef, err := reference.ParseNamed(patchedImageName)
 	log.Debugf("Patched image name: %s", patchedImageName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse patched image name %s: %w", patchedImageName, err)
+		return nil, nil, nil, fmt.Errorf("failed to parse patched image name %s: %w", patchedImageName, err)
 	}
 
 	return &types.PatchResult{
 		OriginalRef: imageName,
 		PatchedRef:  patchedRef,
 		PatchedDesc: patchedDesc,
-	}, nil
+		PatchedImageDigest: patchedImageDigest,
+	}, patchesApplied, patchesFailed, nil
 }
 
 // resolvePatchedTag merges explicit tag & suffix rules, returning the final patched tag.
@@ -798,7 +853,7 @@ func getRepoNameWithDigest(patchedImageName, imageDigest string) string {
 func patchMultiArchImage(
 	ctx context.Context,
 	ch chan error,
-	platformSpecificErrors, image, reportDir, patchedTag, suffix, workingFolder, scanner, format, output string,
+	platformSpecificErrors, image, reportDir, patchedTag, suffix, workingFolder, scanner, format, output string, outputFile string,
 	ignoreError, push bool,
 	bkOpts buildkit.Opts,
 ) error {
@@ -839,14 +894,44 @@ func patchMultiArchImage(
 				return gctx.Err()
 			}
 			defer func() { <-sem }()
+			startTime := time.Now().Format(time.RFC3339)
+			res, patchesApplied, patchesFailed, err := patchSingleArchImage(gctx, ch, image, p.ReportFile, patchedTag, suffix, workingFolder, scanner, format, output, p, ignoreError, push, bkOpts, true)
+			endTime := time.Now().Format(time.RFC3339)
+			var patchedImageName string
+			var patchedImageDigest string
+			var patchStatus = "success"
+			var patchMessage error
+			if err != nil || res == nil {
+				patchStatus = "failed"
+				if err != nil {
+					patchMessage = handlePlatformErr(p, err)
+				} else if res == nil {
+					patchMessage = fmt.Errorf("patchSingleArchImage returned nil result for platform %s", p.OS+"/"+p.Architecture)
+				}
 
-			res, err := patchSingleArchImage(gctx, ch, image, p.ReportFile, patchedTag, suffix, workingFolder, scanner, format, output, p, ignoreError, push, bkOpts, true)
-			if err != nil {
-				return handlePlatformErr(p, err)
-			} else if res == nil {
-				return fmt.Errorf("patchSingleArchImage returned nil result for platform %s", p.OS+"/"+p.Architecture)
+				if outputFile != "" {
+					newImageDetails := NewImageDetails("local", patchedImageName, patchedImageDigest)
+					newLineAjeOutput := NewLineAjeOutput("v1", patchStatus, patchMessage, newImageDetails, patchesApplied, patchesFailed, "v1.2.3", startTime, endTime, "scanner-v2.4")
+					WriteLineAjeOutput(&newLineAjeOutput, strings.ReplaceAll(
+						outputFile,
+						".json",
+						fmt.Sprintf("%s-%s.json", p.OS, p.Architecture),
+					))
+				}
+
+				return patchMessage
 			}
-
+			patchedImageName = res.PatchedRef.String()
+			patchedImageDigest = res.PatchedImageDigest
+			if outputFile != "" {
+				newImageDetails := NewImageDetails("local", patchedImageName, patchedImageDigest)
+				newLineAjeOutput := NewLineAjeOutput("v1", patchStatus, patchMessage, newImageDetails, patchesApplied, patchesFailed, "v1.2.3", startTime, endTime, "scanner-v2.4")
+				WriteLineAjeOutput(&newLineAjeOutput, strings.ReplaceAll(
+					outputFile,
+					".json",
+					fmt.Sprintf("%s-%s.json", p.OS, p.Architecture),
+				))
+			}
 			mu.Lock()
 			patchResults = append(patchResults, *res)
 			mu.Unlock()
@@ -902,4 +987,57 @@ func patchMultiArchImage(
 	log.Infof("Multi-arch image patched with tag %s", patchedImageName.String())
 
 	return nil
+}
+
+// NewImageDetails constructs an ImageDetails instance.
+func NewImageDetails(
+    platform string,
+    patchedImage string,
+    patchedImageDigest string,
+) types.ImageDetails {
+    return types.ImageDetails{
+        Platform:           platform,
+        PatchedImage:       patchedImage,
+        PatchedImageDigest: patchedImageDigest,
+    }
+}
+
+// create output for patch process
+func NewLineAjeOutput(
+    schema string,
+    status string,
+    message error,
+    imageDetails types.ImageDetails,
+    patchesApplied []types.PatchDetail,
+    patchesFailed []types.FailedPatch,
+    copaceticVersion string,
+    startTime string,
+    endTime string,
+    scannerVersion string,
+) types.LineAjeOutput {
+    return types.LineAjeOutput{
+        Schema:           schema,
+        Status:           status,
+        Message:          message.Error(),
+        ImageDetails:     imageDetails,
+        PatchesApplied:   patchesApplied,
+        PatchesFailed:    patchesFailed,
+        CopaceticVersion: copaceticVersion,
+        StartTime:        startTime,
+        EndTime:          endTime,
+        ScannerVersion:   scannerVersion,
+    }
+}
+
+// WriteLineAjeOutput writes the provided LineAjeOutput object to the given filename as pretty-printed JSON.
+func WriteLineAjeOutput(output *types.LineAjeOutput, filename string) error {
+    f, err := os.Create(filename)
+    if err != nil {
+        return err
+    }
+    defer f.Close()
+    
+    enc := json.NewEncoder(f)
+    enc.SetIndent("", "  ")
+    return enc.Encode(output)
 }
