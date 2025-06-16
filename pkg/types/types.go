@@ -37,7 +37,38 @@ func (p PatchPlatform) String() string {
 
 // PatchResult represents the result of a single arch patch operation.
 type PatchResult struct {
-	OriginalRef reference.Named
-	PatchedDesc *ispec.Descriptor
-	PatchedRef  reference.Named
+	OriginalRef 	   reference.Named
+	PatchedDesc 	   *ispec.Descriptor
+	PatchedRef  	   reference.Named
+	PatchedImageDigest string
+}
+
+type LineAjeOutput struct {
+	Schema            string        `json:"schema_no"`
+	Status            string        `json:"status"`
+	Message           string        `json:"message"`
+	ImageDetails      ImageDetails  `json:"imageDetails"`
+	PatchesApplied    []PatchDetail `json:"patchesApplied"`
+	PatchesFailed     []FailedPatch `json:"patchesFailed"`
+	CopaceticVersion  string        `json:"copaceticVersion"`
+	StartTime         string        `json:"startTime"`
+	EndTime           string        `json:"endTime"`
+	ScannerVersion    string        `json:"scannerVersion"`
+}
+
+type ImageDetails struct {
+	Platform           string `json:"platform"`
+	PatchedImage       string `json:"patchedImage"`
+	PatchedImageDigest string `json:"patchedImageDigest"`
+}
+
+type PatchDetail struct {
+	Package       string `json:"package"`
+	InputVersion  string `json:"inputVersion"`
+	OutputVersion string `json:"outputVersion"`
+}
+
+type FailedPatch struct {
+	Package string `json:"package"`
+	Version string `json:"version"`
 }
