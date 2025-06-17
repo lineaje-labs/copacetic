@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	rpmVer "github.com/knqyf263/go-rpm-version"
 	"github.com/moby/buildkit/client/llb"
+	"github.com/project-copacetic/copacetic/pkg/types"
 	"github.com/project-copacetic/copacetic/pkg/buildkit"
 	"github.com/project-copacetic/copacetic/pkg/types/unversioned"
 	"github.com/project-copacetic/copacetic/pkg/utils"
@@ -200,7 +201,7 @@ func getRPMDBType(b []byte) rpmDBType {
 	}
 }
 
-func (rm *rpmManager) InstallUpdates(ctx context.Context, manifest *unversioned.UpdateManifest, ignoreErrors bool) (*llb.State, []string, error) {
+func (rm *rpmManager) InstallUpdates(ctx context.Context, manifest *unversioned.UpdateManifest, ignoreErrors bool) (*llb.State, []string, []types.PatchDetail, []types.FailedPatch, error) {
 	// Resolve set of unique packages to update if UpdateManifest provided, else update all
 	var updates unversioned.UpdatePackages
 	var rpmComparer VersionComparer
@@ -210,17 +211,17 @@ func (rm *rpmManager) InstallUpdates(ctx context.Context, manifest *unversioned.
 		if manifest.Metadata.OS.Type == "oracle" && !ignoreErrors {
 			err = errors.New("detected Oracle image passed in\n" +
 				"Please read https://project-copacetic.github.io/copacetic/website/troubleshooting before patching your Oracle image")
-			return &rm.config.ImageState, nil, err
+			return &rm.config.ImageState, nil, nil, nil, err
 		}
 
 		rpmComparer = VersionComparer{isValidRPMVersion, isLessThanRPMVersion}
 		updates, err = GetUniqueLatestUpdates(manifest.Updates, rpmComparer, ignoreErrors)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 		if len(updates) == 0 {
 			log.Warn("No update packages were specified to apply")
-			return &rm.config.ImageState, nil, nil
+			return &rm.config.ImageState, nil, nil, nil, nil
 		}
 		log.Debugf("latest unique RPMs: %v", updates)
 	}
@@ -232,7 +233,7 @@ func (rm *rpmManager) InstallUpdates(ctx context.Context, manifest *unversioned.
 	}
 
 	if err := rm.probeRPMStatus(ctx, toolImageName); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	var updatedImageState *llb.State
@@ -240,25 +241,27 @@ func (rm *rpmManager) InstallUpdates(ctx context.Context, manifest *unversioned.
 	if rm.isDistroless {
 		updatedImageState, resultManifestBytes, err = rm.unpackAndMergeUpdates(ctx, updates, toolImageName, ignoreErrors)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 	} else {
 		updatedImageState, resultManifestBytes, err = rm.installUpdates(ctx, updates, ignoreErrors)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 	}
 
 	var errPkgs []string
+	var patchesApplied []types.PatchDetail
+	var patchesFailed []types.FailedPatch
 	if manifest != nil {
 		// Validate that the deployed packages are of the requested version or better
-		errPkgs, err = validateRPMPackageVersions(updates, rpmComparer, resultManifestBytes, ignoreErrors)
+		errPkgs, patchesApplied, patchesFailed, err = validateRPMPackageVersions(updates, rpmComparer, resultManifestBytes, ignoreErrors)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 	}
 
-	return updatedImageState, errPkgs, nil
+	return updatedImageState, errPkgs, patchesApplied, patchesFailed, nil
 }
 
 func (rm *rpmManager) probeRPMStatus(ctx context.Context, toolImage string) error {
@@ -466,39 +469,106 @@ func (rm *rpmManager) installUpdates(ctx context.Context, updates unversioned.Up
 		imageStateCurrent = rm.config.PatchedImageState
 	}
 
-	// If specific updates, provided, parse into pkg names, else will update all
-	if updates != nil {
-		// Format the requested updates into a space-separated string
-		pkgStrings := []string{}
-		for _, u := range updates {
-			pkgStrings = append(pkgStrings, u.Name)
+	var rpmToolToUse string
+	if rm.rpmTools["tdnf"] != "" || rm.rpmTools["dnf"] != "" {
+		rpmToolToUse = rm.rpmTools["tdnf"]
+		if rpmToolToUse == "" {
+			rpmToolToUse = rm.rpmTools["dnf"]
 		}
-		pkgs = strings.Join(pkgStrings, " ")
+	} else if rm.rpmTools["yum"] != "" {
+		rpmToolToUse = rm.rpmTools["yum"]
+	} else if rm.rpmTools["microdnf"] != "" {
+		rpmToolToUse = "dnf"
+	} else {
+		err := errors.New("unexpected: no package manager tools were found for patching")
+		return nil, nil, err
 	}
 
 	// Install patches using available rpm managers in order of preference
 	var installCmd string
+	var fullCmd string
+	
+	// If specific updates, provided, parse into pkg names, else will update all
+	if updates != nil {
+		var parts []string
+		const rpmInstallTemplate =	
+								`
+									RPM=%[1]s
+									VER=%[2]s
+									TOOL=%[3]s
+									ARCH=$(uname -m)
+
+									echo "Installing $RPM version $VER via $TOOL for architecture $ARCH"
+
+									if $TOOL install "$RPM-$VER" -y; then
+  										echo "Installed $RPM-$VER"
+									else
+  										echo "$RPM-$VER not found — searching next higher available version..."
+
+										# Set architecture filter depending on tool
+  										case "$TOOL" in
+    										*dnf*|*microdnf*)
+												ARCH_FLAG="--arch=$ARCH"
+												;;
+    										*)
+												ARCH_FLAG="--archlist=$ARCH"
+												;;
+  										esac
+
+										# List all available versions filtered by arch
+  										# Query available versions, requesting version-release fields
+  										if "$TOOL" repoquery --available $ARCH_FLAG --showduplicates "$RPM" >/dev/null 2>&1; then
+    										versions=$(
+      											"$TOOL" repoquery --available $ARCH_FLAG --showduplicates \
+       												--queryformat '%%{version}-%%{release}' "$RPM" \
+        											| sort -V | uniq
+    										)
+  										else
+    										versions=$(
+      											"$TOOL" list available "${RPM}.${ARCH}" --showduplicates 2>/dev/null \
+        											| awk "{print \$2}" | sort -V | uniq
+    										)
+  										fi
+										
+  										echo "Available versions:"
+  										printf "%%s\n" "$versions"
+
+ 										# Pick the next higher version, else the latest one
+										next=$(printf "%%s\n" "$versions" | awk -v cur="$VER" '$0 > cur { print; exit }')
+										if [ -z "$next" ]; then
+    										next=$(printf "%%s\n" "$versions" | tail -n1)
+  										fi
+
+										echo "Using version: $next"
+										$TOOL install "$RPM-$next" -y
+									fi
+								`
+
+		// Format the requested updates into a space-separated string
+		pkgStrings := []string{}
+		for _, u := range updates {
+			pkgStrings = append(pkgStrings, u.Name)
+			parts = append(parts, fmt.Sprintf(rpmInstallTemplate, u.Name, u.FixedVersion, rpmToolToUse))
+		}
+		fullCmd = strings.Join(parts, "\n")
+		pkgs = strings.Join(pkgStrings, " ")
+	}
+
 	switch {
 	case rm.rpmTools["tdnf"] != "" || rm.rpmTools["dnf"] != "":
-		dnfTooling := rm.rpmTools["tdnf"]
-		if dnfTooling == "" {
-			dnfTooling = rm.rpmTools["dnf"]
-		}
-		checkUpdateTemplate := `sh -c '%[1]s clean all && %[1]s makecache --refresh -y; if [ "$(%[1]s -q check-update | wc -l)" -ne 0 ]; then echo >> /updates.txt; fi'`
-		if !rm.checkForUpgrades(ctx, dnfTooling, checkUpdateTemplate) {
+		checkUpdateTemplate := `sh -c '%[1]s clean all && %[1]s makecache --refresh -y; if [ "$(%[1]s -q check-update | wc -l)" -ne 0 ]; then echo >> /updates.txt; fi;'`
+		if !rm.checkForUpgrades(ctx, rpmToolToUse, checkUpdateTemplate) {
 			return nil, nil, fmt.Errorf("no patchable packages found")
 		}
 
-		const dnfInstallTemplate = `sh -c '%[1]s upgrade --refresh %[2]s -y && %[1]s clean all'`
-		installCmd = fmt.Sprintf(dnfInstallTemplate, dnfTooling, pkgs)
+		installCmd = fmt.Sprintf("sh -c '%[1]s clean all && %[1]s makecache --refresh -y; %[2]s \n %[1]s clean all'", rpmToolToUse, strings.ReplaceAll(fullCmd, "'", `'\''`))
 	case rm.rpmTools["yum"] != "":
-		checkUpdateTemplate := `sh -c '%[1]s clean all && %[1]s makecache fast; if [ "$(%[1]s -q check-update | wc -l)" -ne 0 ]; then echo >> /updates.txt; fi'`
+		checkUpdateTemplate := `sh -c '%[1]s clean all && %[1]s makecache fast; if [ "$(%[1]s -q check-update | wc -l)" -ne 0 ]; then echo >> /updates.txt; fi;'`
 		if !rm.checkForUpgrades(ctx, rm.rpmTools["yum"], checkUpdateTemplate) {
 			return nil, nil, fmt.Errorf("no patchable packages found")
 		}
 
-		const yumInstallTemplate = `sh -c '%[1]s upgrade %[2]s -y && %[1]s clean all'`
-		installCmd = fmt.Sprintf(yumInstallTemplate, rm.rpmTools["yum"], pkgs)
+		installCmd = fmt.Sprintf("sh -c '%[1]s clean all && %[1]s makecache fast; %[2]s \n %[1]s clean all'", rpmToolToUse, strings.ReplaceAll(fullCmd, "'", `'\''`))
 	case rm.rpmTools["microdnf"] != "":
 		checkUpdateTemplate := `sh -c "%[1]s install dnf -y; dnf clean all && dnf makecache --refresh -y;  dnf check-update -y; if [ $? -ne 0 ]; then echo >> /updates.txt; fi;"`
 		if !rm.checkForUpgrades(ctx, rm.rpmTools["microdnf"], checkUpdateTemplate) {
@@ -806,10 +876,10 @@ func getJSONPackageData(packageInfo map[string]string) ([]byte, error) {
 	return data, nil
 }
 
-func validateRPMPackageVersions(updates unversioned.UpdatePackages, cmp VersionComparer, resultsBytes []byte, ignoreErrors bool) ([]string, error) {
+func validateRPMPackageVersions(updates unversioned.UpdatePackages, cmp VersionComparer, resultsBytes []byte, ignoreErrors bool) ([]string, []types.PatchDetail, []types.FailedPatch, error) {
 	lines, err := rpmReadResultsManifest(resultsBytes)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	// Not strictly necessary, but sort the two lists to not take a dependency on the
@@ -828,7 +898,7 @@ func validateRPMPackageVersions(updates unversioned.UpdatePackages, cmp VersionC
 	if len(lines) > len(updates) {
 		err = fmt.Errorf("expected %d updates, installed %d", len(updates), len(lines))
 		log.Error(err)
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	// Walk files and check update name is prefix for file name
@@ -836,6 +906,8 @@ func validateRPMPackageVersions(updates unversioned.UpdatePackages, cmp VersionC
 	// using the resultQueryFormat with tab delimiters.
 	var allErrors *multierror.Error
 	var errorPkgs []string
+	var patchesApplied []types.PatchDetail
+	var patchesFailed []types.FailedPatch
 	lineIndex := 0
 	for _, update := range updates {
 		expectedPrefix := update.Name + "\t"
@@ -847,6 +919,27 @@ func validateRPMPackageVersions(updates unversioned.UpdatePackages, cmp VersionC
 		// Found a match, trim prefix- and drop the .arch suffix to get version string
 		archIndex := strings.LastIndex(lines[lineIndex], "\t")
 		version := strings.TrimPrefix(lines[lineIndex][:archIndex], expectedPrefix)
+
+		// capture the patch info
+        var packageInfo types.PatchDetail
+        packageInfo.Package = update.Name
+        packageInfo.InputVersion = update.FixedVersion
+        packageInfo.OutputVersion = version
+
+        // append patch info to patchesApplied
+        patchesApplied = append(patchesApplied, packageInfo)
+
+		// this means that package version was not found
+		if (cmp.IsValid(version) && cmp.LessThan(version, update.FixedVersion)) || version != update.FixedVersion {
+			var failedPatch types.FailedPatch
+			failedPatch.Package = update.Name
+			failedPatch.Version = update.FixedVersion
+			patchesFailed = append(patchesFailed, failedPatch)
+
+			// adding below line since we upgraded package to given plan or latest installable version
+       		update.FixedVersion = version
+		}
+
 		lineIndex++
 
 		if !cmp.IsValid(version) {
@@ -869,8 +962,8 @@ func validateRPMPackageVersions(updates unversioned.UpdatePackages, cmp VersionC
 	}
 
 	if ignoreErrors {
-		return errorPkgs, nil
+		return errorPkgs, patchesApplied, patchesFailed, nil
 	}
 
-	return errorPkgs, allErrors.ErrorOrNil()
+	return errorPkgs, patchesApplied, patchesFailed, allErrors.ErrorOrNil()
 }
