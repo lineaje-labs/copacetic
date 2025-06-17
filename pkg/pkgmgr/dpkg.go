@@ -369,7 +369,7 @@ func (dm *dpkgManager) installUpdates(ctx context.Context, updates unversioned.U
 		var cmdParts []string
 		var cmd string
 		for _, u := range updates {
-			cmd = fmt.Sprintf(aptGetInstallTemplate,u.Name, u.FixedVersion, u.Name, u.Name, u.Name)
+			cmd = fmt.Sprintf(aptGetInstallTemplate, u.Name, u.FixedVersion, u.Name, u.Name, u.Name)
     		cmdParts = append(cmdParts, cmd)
 		}
 		fullCmd := strings.Join(cmdParts, " && ")

@@ -469,39 +469,106 @@ func (rm *rpmManager) installUpdates(ctx context.Context, updates unversioned.Up
 		imageStateCurrent = rm.config.PatchedImageState
 	}
 
-	// If specific updates, provided, parse into pkg names, else will update all
-	if updates != nil {
-		// Format the requested updates into a space-separated string
-		pkgStrings := []string{}
-		for _, u := range updates {
-			pkgStrings = append(pkgStrings, u.Name)
+	var rpmToolToUse string
+	if rm.rpmTools["tdnf"] != "" || rm.rpmTools["dnf"] != "" {
+		rpmToolToUse = rm.rpmTools["tdnf"]
+		if rpmToolToUse == "" {
+			rpmToolToUse = rm.rpmTools["dnf"]
 		}
-		pkgs = strings.Join(pkgStrings, " ")
+	} else if rm.rpmTools["yum"] != "" {
+		rpmToolToUse = rm.rpmTools["yum"]
+	} else if rm.rpmTools["microdnf"] != "" {
+		rpmToolToUse = "dnf"
+	} else {
+		err := errors.New("unexpected: no package manager tools were found for patching")
+		return nil, nil, err
 	}
 
 	// Install patches using available rpm managers in order of preference
 	var installCmd string
+	var fullCmd string
+	
+	// If specific updates, provided, parse into pkg names, else will update all
+	if updates != nil {
+		var parts []string
+		const rpmInstallTemplate =	
+								`
+									RPM=%[1]s
+									VER=%[2]s
+									TOOL=%[3]s
+									ARCH=$(uname -m)
+
+									echo "Installing $RPM version $VER via $TOOL for architecture $ARCH"
+
+									if $TOOL install "$RPM-$VER" -y; then
+  										echo "Installed $RPM-$VER"
+									else
+  										echo "$RPM-$VER not found — searching next higher available version..."
+
+										# Set architecture filter depending on tool
+  										case "$TOOL" in
+    										*dnf*|*microdnf*)
+												ARCH_FLAG="--arch=$ARCH"
+												;;
+    										*)
+												ARCH_FLAG="--archlist=$ARCH"
+												;;
+  										esac
+
+										# List all available versions filtered by arch
+  										# Query available versions, requesting version-release fields
+  										if "$TOOL" repoquery --available $ARCH_FLAG --showduplicates "$RPM" >/dev/null 2>&1; then
+    										versions=$(
+      											"$TOOL" repoquery --available $ARCH_FLAG --showduplicates \
+       												--queryformat '%%{version}-%%{release}' "$RPM" \
+        											| sort -V | uniq
+    										)
+  										else
+    										versions=$(
+      											"$TOOL" list available "${RPM}.${ARCH}" --showduplicates 2>/dev/null \
+        											| awk "{print \$2}" | sort -V | uniq
+    										)
+  										fi
+										
+  										echo "Available versions:"
+  										printf "%%s\n" "$versions"
+
+ 										# Pick the next higher version, else the latest one
+										next=$(printf "%%s\n" "$versions" | awk -v cur="$VER" '$0 > cur { print; exit }')
+										if [ -z "$next" ]; then
+    										next=$(printf "%%s\n" "$versions" | tail -n1)
+  										fi
+
+										echo "Using version: $next"
+										$TOOL install "$RPM-$next" -y
+									fi
+								`
+
+		// Format the requested updates into a space-separated string
+		pkgStrings := []string{}
+		for _, u := range updates {
+			pkgStrings = append(pkgStrings, u.Name)
+			parts = append(parts, fmt.Sprintf(rpmInstallTemplate, u.Name, u.FixedVersion, rpmToolToUse))
+		}
+		fullCmd = strings.Join(parts, "\n")
+		pkgs = strings.Join(pkgStrings, " ")
+	}
+
 	switch {
 	case rm.rpmTools["tdnf"] != "" || rm.rpmTools["dnf"] != "":
-		dnfTooling := rm.rpmTools["tdnf"]
-		if dnfTooling == "" {
-			dnfTooling = rm.rpmTools["dnf"]
-		}
-		checkUpdateTemplate := `sh -c '%[1]s clean all && %[1]s makecache --refresh -y; if [ "$(%[1]s -q check-update | wc -l)" -ne 0 ]; then echo >> /updates.txt; fi'`
-		if !rm.checkForUpgrades(ctx, dnfTooling, checkUpdateTemplate) {
+		checkUpdateTemplate := `sh -c '%[1]s clean all && %[1]s makecache --refresh -y; if [ "$(%[1]s -q check-update | wc -l)" -ne 0 ]; then echo >> /updates.txt; fi;'`
+		if !rm.checkForUpgrades(ctx, rpmToolToUse, checkUpdateTemplate) {
 			return nil, nil, fmt.Errorf("no patchable packages found")
 		}
 
-		const dnfInstallTemplate = `sh -c '%[1]s upgrade --refresh %[2]s -y && %[1]s clean all'`
-		installCmd = fmt.Sprintf(dnfInstallTemplate, dnfTooling, pkgs)
+		installCmd = fmt.Sprintf("sh -c '%[1]s clean all && %[1]s makecache --refresh -y; %[2]s \n %[1]s clean all'", rpmToolToUse, strings.ReplaceAll(fullCmd, "'", `'\''`))
 	case rm.rpmTools["yum"] != "":
-		checkUpdateTemplate := `sh -c '%[1]s clean all && %[1]s makecache fast; if [ "$(%[1]s -q check-update | wc -l)" -ne 0 ]; then echo >> /updates.txt; fi'`
+		checkUpdateTemplate := `sh -c '%[1]s clean all && %[1]s makecache fast; if [ "$(%[1]s -q check-update | wc -l)" -ne 0 ]; then echo >> /updates.txt; fi;'`
 		if !rm.checkForUpgrades(ctx, rm.rpmTools["yum"], checkUpdateTemplate) {
 			return nil, nil, fmt.Errorf("no patchable packages found")
 		}
 
-		const yumInstallTemplate = `sh -c '%[1]s upgrade %[2]s -y && %[1]s clean all'`
-		installCmd = fmt.Sprintf(yumInstallTemplate, rm.rpmTools["yum"], pkgs)
+		installCmd = fmt.Sprintf("sh -c '%[1]s clean all && %[1]s makecache fast; %[2]s \n %[1]s clean all'", rpmToolToUse, strings.ReplaceAll(fullCmd, "'", `'\''`))
 	case rm.rpmTools["microdnf"] != "":
 		checkUpdateTemplate := `sh -c "%[1]s install dnf -y; dnf clean all && dnf makecache --refresh -y;  dnf check-update -y; if [ $? -ne 0 ]; then echo >> /updates.txt; fi;"`
 		if !rm.checkForUpgrades(ctx, rm.rpmTools["microdnf"], checkUpdateTemplate) {
