@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/moby/buildkit/client/llb"
+	"github.com/project-copacetic/copacetic/pkg/types"
 	"github.com/moby/buildkit/frontend/gateway/client"
 	"github.com/project-copacetic/copacetic/pkg/buildkit"
 	"github.com/project-copacetic/copacetic/pkg/types/unversioned"
@@ -25,7 +26,7 @@ const (
 )
 
 type PackageManager interface {
-	InstallUpdates(context.Context, *unversioned.UpdateManifest, bool) (*llb.State, []string, error)
+	InstallUpdates(context.Context, *unversioned.UpdateManifest, bool) (*llb.State, []string, []types.PatchDetail, []types.FailedPatch, error)
 	GetPackageType() string
 }
 

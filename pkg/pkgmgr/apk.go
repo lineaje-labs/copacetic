@@ -12,6 +12,7 @@ import (
 	apkVer "github.com/knqyf263/go-apk-version"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/project-copacetic/copacetic/pkg/buildkit"
+	"github.com/project-copacetic/copacetic/pkg/types"
 	"github.com/project-copacetic/copacetic/pkg/types/unversioned"
 	"github.com/project-copacetic/copacetic/pkg/utils"
 	log "github.com/sirupsen/logrus"
@@ -49,17 +50,17 @@ func apkReadResultsManifest(b []byte) ([]string, error) {
 	return lines, nil
 }
 
-func validateAPKPackageVersions(updates unversioned.UpdatePackages, cmp VersionComparer, resultsBytes []byte, ignoreErrors bool) ([]string, error) {
+func validateAPKPackageVersions(updates unversioned.UpdatePackages, cmp VersionComparer, resultsBytes []byte, ignoreErrors bool) ([]string, []types.PatchDetail, []types.FailedPatch, error) {
 	lines, err := apkReadResultsManifest(resultsBytes)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	// Assert apk info list doesn't contain more entries than expected
 	if len(lines) > len(updates) {
 		err = fmt.Errorf("expected %d updates, installed %d", len(updates), len(lines))
 		log.Error(err)
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	// Not strictly necessary, but sort the two lists to not take a dependency on the
@@ -82,6 +83,8 @@ func validateAPKPackageVersions(updates unversioned.UpdatePackages, cmp VersionC
 	// ...
 	var allErrors *multierror.Error
 	var errorPkgs []string
+	var patchesApplied []types.PatchDetail
+	var patchesFailed []types.FailedPatch
 	lineIndex := 0
 	for _, update := range updates {
 		expectedPrefix := update.Name + "-"
@@ -92,6 +95,27 @@ func validateAPKPackageVersions(updates unversioned.UpdatePackages, cmp VersionC
 
 		// Found a match, trim prefix- to get version string
 		version := strings.TrimPrefix(lines[lineIndex], expectedPrefix)
+		
+		// capture the patch info
+        var packageInfo types.PatchDetail
+        packageInfo.Package = update.Name
+        packageInfo.InputVersion = update.FixedVersion
+        packageInfo.OutputVersion = version
+
+        // append patch info to patchesApplied
+        patchesApplied = append(patchesApplied, packageInfo)
+
+		// this means that package version was not found
+		if (cmp.IsValid(version) && cmp.LessThan(version, update.FixedVersion)) || version != update.FixedVersion {
+			var failedPatch types.FailedPatch
+			failedPatch.Package = update.Name
+			failedPatch.Version = update.FixedVersion
+			patchesFailed = append(patchesFailed, failedPatch)
+
+			// adding below line since we upgraded package to given plan or latest installable version
+       		update.FixedVersion = version
+		}
+
 		lineIndex++
 		if !cmp.IsValid(version) {
 			err := fmt.Errorf("invalid version %s found for package %s", version, update.Name)
@@ -111,47 +135,47 @@ func validateAPKPackageVersions(updates unversioned.UpdatePackages, cmp VersionC
 	}
 
 	if ignoreErrors {
-		return errorPkgs, nil
+		return errorPkgs, patchesApplied, patchesFailed, nil
 	}
 
-	return errorPkgs, allErrors.ErrorOrNil()
+	return errorPkgs, patchesApplied, patchesFailed, allErrors.ErrorOrNil()
 }
 
-func (am *apkManager) InstallUpdates(ctx context.Context, manifest *unversioned.UpdateManifest, ignoreErrors bool) (*llb.State, []string, error) {
+func (am *apkManager) InstallUpdates(ctx context.Context, manifest *unversioned.UpdateManifest, ignoreErrors bool) (*llb.State, []string, []types.PatchDetail, []types.FailedPatch, error) {
 	// If manifest is nil, update all packages
 	if manifest == nil {
 		updatedImageState, _, err := am.upgradePackages(ctx, nil, ignoreErrors)
 		if err != nil {
-			return updatedImageState, nil, err
+			return updatedImageState, nil,nil, nil, err
 		}
 		// add validation in the future
-		return updatedImageState, nil, nil
+		return updatedImageState, nil, nil, nil, nil
 	}
 
 	// Resolve set of unique packages to update
 	apkComparer := VersionComparer{isValidAPKVersion, isLessThanAPKVersion}
 	updates, err := GetUniqueLatestUpdates(manifest.Updates, apkComparer, ignoreErrors)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 	if len(updates) == 0 {
 		log.Warn("No update packages were specified to apply")
-		return &am.config.ImageState, nil, nil
+		return &am.config.ImageState, nil, nil, nil, nil
 	}
 	log.Debugf("latest unique APKs: %v", updates)
 
 	updatedImageState, resultsBytes, err := am.upgradePackages(ctx, updates, ignoreErrors)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	// Validate that the deployed packages are of the requested version or better
-	errPkgs, err := validateAPKPackageVersions(updates, apkComparer, resultsBytes, ignoreErrors)
+	errPkgs, patchesApplied, patchesFailed, err := validateAPKPackageVersions(updates, apkComparer, resultsBytes, ignoreErrors)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, patchesApplied, patchesFailed, err
 	}
 
-	return updatedImageState, errPkgs, nil
+	return updatedImageState, errPkgs, patchesApplied, patchesFailed, nil
 }
 
 // Patch a regular alpine image with:
@@ -175,23 +199,56 @@ func (am *apkManager) upgradePackages(ctx context.Context, updates unversioned.U
 	var resultManifestBytes []byte
 	var err error
 	if updates != nil {
-		// Add all requested update packages
-		// This works around cases where some packages (for example, tiff) require other packages in it's dependency tree to be updated
-		const apkAddTemplate = `apk add --no-cache %s`
+		// Install all requested update packages by specifying the version.
+		// If specified version doesn't exist then search for installable version for the package on the alpine distro
+		var parts []string
+		const checkAlpineVersionTemplate = 
+									`
+										arch="$(apk --print-arch)"
+										alpine_version=$(cat /etc/alpine-release)
+
+										# Check if the version contains a release candidate suffix
+										if echo "$alpine_version" | grep -q '_rc'; then
+											# Extract the base version number (e.g., 3.17 from 3.17.0_rc1)
+											alpine_version=$(echo "$alpine_version" | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
+										fi
+
+										# Now, alpine_version contains the stable version number (e.g., 3.17)
+										echo "Using Alpine version: $alpine_version on $arch"
+									`
+		const apkInstallTemplate = `
+										pkg=%[1]s
+										req=%[2]s
+										echo "Started updagrading $pkg on $alpine_version"
+										if apk add --no-cache "$pkg"="$req"; then
+  											echo "Version $req for $pkg installed."
+										else
+											echo "Version $req for $pkg not found — searching for alternatives..."
+
+											# Scrape all versions from Alpine package site, then sort/unique them:
+											versions=$(wget -qO- "https://pkgs.alpinelinux.org/packages?name=$pkg&branch=v$alpine_version&arch=$arch" \
+												| grep -oE "[0-9]+\.[0-9]+(\.[0-9]+)?-r[0-9]+" \
+												| sort -V | uniq)
+
+											echo "Available versions: $versions"
+
+											# Pick the next greater version or fallback to the latest:
+											next=$(printf "%%s\n" "$versions" | awk -v cur="$req" '$0 > cur { print; exit }')
+											[ -z "$next" ] && next=$(printf "%%s\n" "$versions" | tail -n1)
+
+											echo "Selecting next version for $pkg: $next"
+											apk add --no-cache "$pkg"="$next"
+										fi
+									`
+		
 		pkgStrings := []string{}
 		for _, u := range updates {
 			pkgStrings = append(pkgStrings, u.Name)
+			parts = append(parts, fmt.Sprintf(apkInstallTemplate, u.Name, u.FixedVersion))
 		}
-		addCmd := fmt.Sprintf(apkAddTemplate, strings.Join(pkgStrings, " "))
-		apkAdded := apkUpdated.Run(llb.Shlex(addCmd), llb.WithProxy(utils.GetProxy())).Root()
-
-		// Install all requested update packages without specifying the version. This works around:
-		//  - Reports being slightly out of date, where a newer security revision has displaced the one specified leading to not found errors.
-		//  - Reports not specifying version epochs correct (e.g. bsdutils=2.36.1-8+deb11u1 instead of with epoch as 1:2.36.1-8+dev11u1)
-		// Note that this keeps the log files from the operation, which we can consider removing as a size optimization in the future.
-		const apkInstallTemplate = `apk upgrade --no-cache %s`
-		installCmd := fmt.Sprintf(apkInstallTemplate, strings.Join(pkgStrings, " "))
-		apkInstalled = apkAdded.Run(llb.Shlex(installCmd), llb.WithProxy(utils.GetProxy())).Root()
+		fullCmd := strings.Join(parts, "\n")
+		installCmd := fmt.Sprintf("sh -c '%s %s'",  strings.ReplaceAll(checkAlpineVersionTemplate, "'", `'\''`), strings.ReplaceAll(fullCmd, "'", `'\''`))
+		apkInstalled = apkUpdated.Run(llb.Shlex(installCmd), llb.WithProxy(utils.GetProxy())).Root()
 
 		// Write updates-manifest to host for post-patch validation
 		const outputResultsTemplate = `sh -c 'apk info --installed -v %s > %s; if [[ $? -ne 0 ]]; then echo "WARN: apk info --installed returned $?"; fi'`

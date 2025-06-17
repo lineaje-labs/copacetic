@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	debVer "github.com/knqyf263/go-deb-version"
 	"github.com/moby/buildkit/client/llb"
+	"github.com/project-copacetic/copacetic/pkg/types"
 	"github.com/project-copacetic/copacetic/pkg/buildkit"
 	"github.com/project-copacetic/copacetic/pkg/types/unversioned"
 	"github.com/project-copacetic/copacetic/pkg/utils"
@@ -125,14 +126,14 @@ func getDPKGStatusType(b []byte) dpkgStatusType {
 	return statusType
 }
 
-func (dm *dpkgManager) InstallUpdates(ctx context.Context, manifest *unversioned.UpdateManifest, ignoreErrors bool) (*llb.State, []string, error) {
+func (dm *dpkgManager) InstallUpdates(ctx context.Context, manifest *unversioned.UpdateManifest, ignoreErrors bool) (*llb.State, []string, []types.PatchDetail, []types.FailedPatch, error) {
 	// Probe for additional information to execute the appropriate update install graphs
 	toolImageName := getAPTImageName(manifest, dm.osVersion, true) // check if we can resolve the tool image
 	if _, err := tryImage(ctx, toolImageName, dm.config.Client); err != nil {
 		toolImageName = getAPTImageName(manifest, dm.osVersion, false)
 	}
 	if err := dm.probeDPKGStatus(ctx, toolImageName); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	// If manifest nil, update all packages
@@ -140,16 +141,16 @@ func (dm *dpkgManager) InstallUpdates(ctx context.Context, manifest *unversioned
 		if dm.isDistroless {
 			updatedImageState, _, err := dm.unpackAndMergeUpdates(ctx, nil, toolImageName, ignoreErrors)
 			if err != nil {
-				return updatedImageState, nil, err
+				return updatedImageState, nil, nil, nil, err
 			}
-			return updatedImageState, nil, nil
+			return updatedImageState, nil, nil, nil, nil
 		}
 
 		updatedImageState, _, err := dm.installUpdates(ctx, nil, ignoreErrors)
 		if err != nil {
-			return updatedImageState, nil, err
+			return updatedImageState, nil, nil, nil, err
 		}
-		return updatedImageState, nil, nil
+		return updatedImageState, nil, nil, nil, nil
 	}
 
 	// Else update according to specified updates
@@ -157,11 +158,11 @@ func (dm *dpkgManager) InstallUpdates(ctx context.Context, manifest *unversioned
 	debComparer := VersionComparer{isValidDebianVersion, isLessThanDebianVersion}
 	updates, err := GetUniqueLatestUpdates(manifest.Updates, debComparer, ignoreErrors)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 	if len(updates) == 0 {
 		log.Warn("No update packages were specified to apply")
-		return &dm.config.ImageState, nil, nil
+		return &dm.config.ImageState, nil, nil, nil, nil
 	}
 
 	var updatedImageState *llb.State
@@ -169,22 +170,22 @@ func (dm *dpkgManager) InstallUpdates(ctx context.Context, manifest *unversioned
 	if dm.isDistroless {
 		updatedImageState, resultManifestBytes, err = dm.unpackAndMergeUpdates(ctx, updates, toolImageName, ignoreErrors)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 	} else {
 		updatedImageState, resultManifestBytes, err = dm.installUpdates(ctx, updates, ignoreErrors)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 	}
 
 	// Validate that the deployed packages are of the requested version or better
-	errPkgs, err := validateDebianPackageVersions(updates, debComparer, resultManifestBytes, ignoreErrors)
+	errPkgs, patchesApplied, patchesFailed, err := validateDebianPackageVersions(updates, debComparer, resultManifestBytes, ignoreErrors)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
-	return updatedImageState, errPkgs, nil
+	return updatedImageState, errPkgs, patchesApplied, patchesFailed,  nil
 }
 
 // Probe the target image for:
@@ -360,19 +361,19 @@ func (dm *dpkgManager) installUpdates(ctx context.Context, updates unversioned.U
 		}
 	}
 
-	// Install all requested update packages without specifying the version. This works around:
-	//  - Reports being slightly out of date, where a newer security revision has displaced the one specified leading to not found errors.
-	//  - Reports not specifying version epochs correct (e.g. bsdutils=2.36.1-8+deb11u1 instead of with epoch as 1:2.36.1-8+dev11u1)
+	// Install all requested update packages by specifying the version.
 	// Note that this keeps the log files from the operation, which we can consider removing as a size optimization in the future.
-
 	var installCmd string
 	if updates != nil {
-		aptGetInstallTemplate := `sh -c "apt-get install --no-install-recommends -y %s && apt-get clean -y"`
-		pkgStrings := []string{}
+		aptGetInstallTemplate := `apt-get install --no-install-recommends -y %s=%s && apt-get clean -y || { CURRENT=$(apt-cache policy curl | awk '/Installed:/ {print $2}'); NEXT=$(apt-cache madison %s | awk '{print $3}' | sort -V | uniq | awk -v cur='$CURRENT' '$0 > cur' | tail -n1); echo 'Next version for %s is: '"$NEXT"; apt-get install --no-install-recommends -y %s=$NEXT && apt-get clean -y;}`
+		var cmdParts []string
+		var cmd string
 		for _, u := range updates {
-			pkgStrings = append(pkgStrings, u.Name)
+			cmd = fmt.Sprintf(aptGetInstallTemplate,u.Name, u.FixedVersion, u.Name, u.Name, u.Name)
+    		cmdParts = append(cmdParts, cmd)
 		}
-		installCmd = fmt.Sprintf(aptGetInstallTemplate, strings.Join(pkgStrings, " "))
+		fullCmd := strings.Join(cmdParts, " && ")
+		installCmd = fmt.Sprintf(`sh -c "%s"`, fullCmd)
 	} else {
 		// if updates is not specified, update all packages
 		installCmd = `sh -c "output=$(apt-get upgrade -y && apt-get clean -y && apt-get autoremove -y 2>&1); if [ $? -ne 0 ]; then echo "$output" >>error_log.txt; fi"`
@@ -630,15 +631,17 @@ func dpkgParseResultsManifest(b []byte) (map[string]string, error) {
 	return updateMap, nil
 }
 
-func validateDebianPackageVersions(updates unversioned.UpdatePackages, cmp VersionComparer, results []byte, ignoreErrors bool) ([]string, error) {
+func validateDebianPackageVersions(updates unversioned.UpdatePackages, cmp VersionComparer, results []byte, ignoreErrors bool) ([]string, []types.PatchDetail, []types.FailedPatch, error) {
 	// Load file into map[string]string for package:version lookup
 	updateMap, err := dpkgParseResultsManifest(results)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	// for each target package, validate version is mapped version is >= requested version
 	var allErrors *multierror.Error
+	var patchesApplied []types.PatchDetail
+	var patchesFailed []types.FailedPatch
 	errorPkgs := []string{}
 	for _, update := range updates {
 		version, ok := updateMap[update.Name]
@@ -646,6 +649,27 @@ func validateDebianPackageVersions(updates unversioned.UpdatePackages, cmp Versi
 			log.Warnf("Package %s is not installed, may have been uninstalled during upgrade", update.Name)
 			continue
 		}
+
+		// capture the patch info
+        var packageInfo types.PatchDetail
+        packageInfo.Package = update.Name
+        packageInfo.InputVersion = update.FixedVersion
+        packageInfo.OutputVersion = version
+
+        // append patch info to patchesApplied
+        patchesApplied = append(patchesApplied, packageInfo)
+
+		// this means that package version was not found
+		if (cmp.IsValid(version) && cmp.LessThan(version, update.FixedVersion)) || version != update.FixedVersion {
+			var failedPatch types.FailedPatch
+			failedPatch.Package = update.Name
+			failedPatch.Version = update.FixedVersion
+			patchesFailed = append(patchesFailed, failedPatch)
+
+			// adding below line since we upgraded package to given plan or latest installable version
+       		update.FixedVersion = version
+		}
+
 		if !cmp.IsValid(version) {
 			err := fmt.Errorf("invalid version %s found for package %s", version, update.Name)
 			log.Error(err)
@@ -664,10 +688,10 @@ func validateDebianPackageVersions(updates unversioned.UpdatePackages, cmp Versi
 	}
 
 	if ignoreErrors {
-		return errorPkgs, nil
+		return errorPkgs, nil, nil, nil
 	}
 
-	return errorPkgs, allErrors.ErrorOrNil()
+	return errorPkgs, patchesApplied, patchesFailed, allErrors.ErrorOrNil()
 }
 
 func getJSONStatusdFileMap(statusdFileMap map[string]string) ([]byte, error) {
