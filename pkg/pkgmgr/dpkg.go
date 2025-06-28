@@ -655,6 +655,12 @@ func validateDebianPackageVersions(updates unversioned.UpdatePackages, cmp Versi
 			log.Warnf("Package %s is not installed, may have been uninstalled during upgrade", update.Name)
 			continue
 		}
+
+		// LINEAJE: Set the actual package version installed to prevent the caller from detecting a version mismatch
+		if (cmp.IsValid(version) && cmp.LessThan(version, update.FixedVersion)) || version != update.FixedVersion {
+			update.FixedVersion = version
+		}
+
 		if !cmp.IsValid(version) {
 			err := fmt.Errorf("invalid version %s found for package %s", version, update.Name)
 			log.Error(err)

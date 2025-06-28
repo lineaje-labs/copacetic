@@ -922,6 +922,12 @@ func validateRPMPackageVersions(updates unversioned.UpdatePackages, cmp VersionC
 		// Found a match, trim prefix- and drop the .arch suffix to get version string
 		archIndex := strings.LastIndex(lines[lineIndex], "\t")
 		version := strings.TrimPrefix(lines[lineIndex][:archIndex], expectedPrefix)
+
+		// LINEAJE: Set the actual package version installed to prevent the caller from detecting a version mismatch
+		if (cmp.IsValid(version) && cmp.LessThan(version, update.FixedVersion)) || version != update.FixedVersion {
+			update.FixedVersion = version
+		}
+
 		lineIndex++
 
 		if !cmp.IsValid(version) {
