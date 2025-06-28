@@ -840,15 +840,17 @@ func (rm *rpmManager) GetPackageType() string {
 
 func (rm *rpmManager) getRPMToolToUse() (string, error) {
 	var rpmToolToUse string
-	if rm.rpmTools["tdnf"] != "" {
+	switch {
+	case rm.rpmTools["tdnf"] != "" || rm.rpmTools["dnf"] != "":
 		rpmToolToUse = rm.rpmTools["tdnf"]
-	} else if rm.rpmTools["dnf"] != "" {
-		rpmToolToUse = rm.rpmTools["dnf"]
-	} else if rm.rpmTools["yum"] != "" {
+		if rpmToolToUse == "" {
+			rpmToolToUse = rm.rpmTools["dnf"]
+		}
+	case rm.rpmTools["yum"] != "":
 		rpmToolToUse = rm.rpmTools["yum"]
-	} else if rm.rpmTools["microdnf"] != "" {
+	case rm.rpmTools["microdnf"] != "":
 		rpmToolToUse = "dnf"
-	} else {
+	default:
 		return "", errors.New("unexpected: no package manager tools were found for patching")
 	}
 	return rpmToolToUse, nil
