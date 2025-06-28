@@ -91,7 +91,7 @@ func validateAPKPackageVersions(updates unversioned.UpdatePackages, cmp VersionC
 		}
 
 		// Found a match, trim prefix- to get version string
-		version := strings.TrimPrefix(lines[lineIndex], expectedPrefix)		
+		version := strings.TrimPrefix(lines[lineIndex], expectedPrefix)
 		lineIndex++
 		if !cmp.IsValid(version) {
 			err := fmt.Errorf("invalid version %s found for package %s", version, update.Name)
