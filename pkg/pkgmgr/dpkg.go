@@ -364,14 +364,23 @@ func (dm *dpkgManager) installUpdates(ctx context.Context, updates unversioned.U
 	// Note that this keeps the log files from the operation, which we can consider removing as a size optimization in the future.
 	var installCmd string
 	if updates != nil {
-		aptGetInstallTemplate := `apt-get install --no-install-recommends -y %s=%s && apt-get clean -y || { CURRENT=$(apt-cache policy curl | awk '/Installed:/ {print $2}'); NEXT=$(apt-cache madison %s | awk '{print $3}' | sort -V | uniq | awk -v cur='$CURRENT' '$0 > cur' | tail -n1); echo 'Next version for %s is: '"$NEXT"; apt-get install --no-install-recommends -y %s=$NEXT && apt-get clean -y;}`
+		// LINEAJE: Command was updated to install the exact package version specified in the input, instead of the latest version
+		// If the specified version is not available (removed in the apt server), then bump up the package version and retry the install command
+		// The version to bump up to is based on the output of `apt-cache madison` command
+		aptGetInstallTemplate := `apt-get install --no-install-recommends -y %[1]s=%[2]s && apt-get clean -y` +
+			` || { CURRENT=$(apt-cache policy %[1]s | awk '/Installed:/ {print $2}'); ` +
+			` NEXT=$(apt-cache madison %[1]s | awk '{print $3}' | sort -V | uniq | awk -v cur='$CURRENT' '$0 > cur' | tail -n1); ` +
+			` echo 'Next version for %[1]s is: '"$NEXT"; ` +
+			` apt-get install --no-install-recommends -y %[1]s=$NEXT && apt-get clean -y;}`
 		var cmdParts []string
 		var cmd string
 		for _, u := range updates {
-			cmd = fmt.Sprintf(aptGetInstallTemplate,u.Name, u.FixedVersion, u.Name, u.Name, u.Name)
-    		cmdParts = append(cmdParts, cmd)
+			// LINEAJE: Support running multiple package installation commands
+			cmd = fmt.Sprintf(aptGetInstallTemplate, u.Name, u.FixedVersion)
+			cmdParts = append(cmdParts, cmd)
 		}
 		fullCmd := strings.Join(cmdParts, " && ")
+		// LINEAJE: TODO: Handle the scenario where length of the command is too long
 		installCmd = fmt.Sprintf(`sh -c "%s"`, fullCmd)
 	} else {
 		// if updates is not specified, update all packages
