@@ -471,7 +471,8 @@ func patchSingleArchImage(
 					return nil, err
 				}
 			} else {
-				// get package manager based on os family type
+				// LINEAJE: Input may not have OS Type or Version set. Fetch these values from the OS Family instead.
+				// Return an error if either OS Type or Version could not be determined.
 				if updates.Metadata.OS.Type == "" || updates.Metadata.OS.Version == "" {
 					osType, osVersion, err := determineOSFamily(ctx, c, config)
 					updates.Metadata.OS.Type = osType
