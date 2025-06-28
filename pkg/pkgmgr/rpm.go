@@ -840,11 +840,10 @@ func (rm *rpmManager) GetPackageType() string {
 
 func (rm *rpmManager) getRPMToolToUse() (string, error) {
 	var rpmToolToUse string
-	if rm.rpmTools["tdnf"] != "" || rm.rpmTools["dnf"] != "" {
+	if rm.rpmTools["tdnf"] != "" {
 		rpmToolToUse = rm.rpmTools["tdnf"]
-		if rpmToolToUse == "" {
-			rpmToolToUse = rm.rpmTools["dnf"]
-		}
+	} else if rm.rpmTools["dnf"] != "" {
+		rpmToolToUse = rm.rpmTools["dnf"]
 	} else if rm.rpmTools["yum"] != "" {
 		rpmToolToUse = rm.rpmTools["yum"]
 	} else if rm.rpmTools["microdnf"] != "" {
