@@ -175,11 +175,11 @@ func (am *apkManager) upgradePackages(ctx context.Context, updates unversioned.U
 	var resultManifestBytes []byte
 	var err error
 	if updates != nil {
-		// Install all requested update packages by specifying the version.
-		// If specified version doesn't exist then search for installable version for the package on the alpine distro
+		// LINEAJE: Command was updated to install the exact package version specified in the input, instead of the latest version
+		// If the specified version is not available (removed in the alpine server), then bump up the package version and retry the install command
+		// The version to bump up to is based on the output of `wget` from `pkgs.alpinelinux.org` for the specified package name, alpine version, and architecture
 		var parts []string
-		const checkAlpineVersionTemplate = 
-									`
+		const checkAlpineVersionTemplate = `
 										arch="$(apk --print-arch)"
 										alpine_version=$(cat /etc/alpine-release)
 
@@ -194,36 +194,37 @@ func (am *apkManager) upgradePackages(ctx context.Context, updates unversioned.U
 									`
 		const apkInstallTemplate = `
 										pkg=%[1]s
-										req=%[2]s
-										echo "Started updagrading $pkg on $alpine_version"
-										if apk add --no-cache "$pkg"="$req"; then
-  											echo "Version $req for $pkg installed."
+										req_ver=%[2]s
+										echo "Started upgrading $pkg on $alpine_version"
+										if apk add --no-cache "$pkg"="$req_ver"; then
+  											echo "Version $req_ver for $pkg installed."
 										else
-											echo "Version $req for $pkg not found — searching for alternatives..."
+											echo "Version $req_ver for $pkg not found — searching for alternatives..."
 
 											# Scrape all versions from Alpine package site, then sort/unique them:
 											versions=$(wget -qO- "https://pkgs.alpinelinux.org/packages?name=$pkg&branch=v$alpine_version&arch=$arch" \
 												| grep -oE "[0-9]+\.[0-9]+(\.[0-9]+)?-r[0-9]+" \
 												| sort -V | uniq)
 
-											echo "Available versions: $versions"
+											echo "Available versions for $pkg: $versions"
 
 											# Pick the next greater version or fallback to the latest:
-											next=$(printf "%%s\n" "$versions" | awk -v cur="$req" '$0 > cur { print; exit }')
-											[ -z "$next" ] && next=$(printf "%%s\n" "$versions" | tail -n1)
+											next_ver=$(printf "%%s\n" "$versions" | awk -v cur="$req_ver" '$0 > cur { print; exit }')
+											[ -z "$next_ver" ] && next_ver=$(printf "%%s\n" "$versions" | tail -n1)
 
-											echo "Selecting next version for $pkg: $next"
-											apk add --no-cache "$pkg"="$next"
+											echo "Selecting next version for $pkg: $next_ver"
+											apk add --no-cache "$pkg"="$next_ver"
 										fi
 									`
-		
+
 		pkgStrings := []string{}
 		for _, u := range updates {
 			pkgStrings = append(pkgStrings, u.Name)
 			parts = append(parts, fmt.Sprintf(apkInstallTemplate, u.Name, u.FixedVersion))
 		}
 		fullCmd := strings.Join(parts, "\n")
-		installCmd := fmt.Sprintf("sh -c '%s %s'",  strings.ReplaceAll(checkAlpineVersionTemplate, "'", `'\''`), strings.ReplaceAll(fullCmd, "'", `'\''`))
+		// LINEAJE: TODO: Handle the scenario where length of the command is too long
+		installCmd := fmt.Sprintf("sh -c '%s %s'", strings.ReplaceAll(checkAlpineVersionTemplate, "'", `'\''`), strings.ReplaceAll(fullCmd, "'", `'\''`))
 		apkInstalled = apkUpdated.Run(llb.Shlex(installCmd), llb.WithProxy(utils.GetProxy())).Root()
 
 		// Write updates-manifest to host for post-patch validation
