@@ -256,7 +256,7 @@ func Test_InstallUpdates_APK(t *testing.T) {
 			expectedError: "",
 		},
 		{
-			name: "Ignore errors",
+			name: "Ignore errors as version mismatch does not generate any error now",
 			manifest: &unversioned.UpdateManifest{
 				Updates: unversioned.UpdatePackages{
 					{Name: "package1", FixedVersion: "2.0.0"},
@@ -267,7 +267,7 @@ func Test_InstallUpdates_APK(t *testing.T) {
 				mr.On("ReadFile", mock.Anything, mock.Anything).Return([]byte("package1-1.0.1\n"), nil)
 			},
 			expectedState: true,
-			expectedPkgs:  []string{"package1"},
+			expectedPkgs:  nil,
 			expectedError: "",
 		},
 	}

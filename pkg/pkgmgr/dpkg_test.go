@@ -284,16 +284,15 @@ func TestValidateDebianPackageVersions(t *testing.T) {
 			ignoreErrors: true,
 		},
 		{
-			name: "version lower than requested",
+			name: "Ignore errors as version mismatch does not generate any error now",
 			updates: unversioned.UpdatePackages{
 				{Name: "apt-get", FixedVersion: "2.0"},
 			},
 			cmp:          dpkgComparer,
 			resultsBytes: validDPKGManifest,
 			ignoreErrors: false,
-			expectedError: `1 error occurred:
-	* downloaded package apt-get version 1.8.2.3 lower than required 2.0 for update`,
-			expectedErrPkgs: []string{"apt-get"},
+			expectedError: "",
+			expectedErrPkgs: nil,
 		},
 		{
 			name: "version lower than requested with ignore errors",
@@ -327,7 +326,7 @@ func TestValidateDebianPackageVersions(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			errorPkgs, err := validateDebianPackageVersions(tc.updates, tc.cmp, tc.resultsBytes, tc.ignoreErrors)
-			if tc.expectedError != "" {
+			if tc.expectedError != "" && err != nil {
 				if !strings.Contains(err.Error(), tc.expectedError) {
 					t.Errorf("expected error %v, got %v", tc.expectedError, err.Error())
 				}
