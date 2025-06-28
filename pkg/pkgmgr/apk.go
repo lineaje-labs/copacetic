@@ -175,23 +175,57 @@ func (am *apkManager) upgradePackages(ctx context.Context, updates unversioned.U
 	var resultManifestBytes []byte
 	var err error
 	if updates != nil {
-		// Add all requested update packages
-		// This works around cases where some packages (for example, tiff) require other packages in it's dependency tree to be updated
-		const apkAddTemplate = `apk add --no-cache %s`
+		// LINEAJE: Command was updated to install the exact package version specified in the input, instead of the latest version
+		// If the specified version is not available (removed in the alpine server), then bump up the package version and retry the install command
+		// The version to bump up to is based on the output of `wget` from `pkgs.alpinelinux.org` for the specified package name, alpine version, and architecture
+		var parts []string
+		const checkAlpineVersionTemplate = `
+										arch="$(apk --print-arch)"
+										alpine_version=$(cat /etc/alpine-release)
+
+										# Check if the version contains a release candidate suffix
+										if echo "$alpine_version" | grep -q '_rc'; then
+											# Extract the base version number (e.g., 3.17 from 3.17.0_rc1)
+											alpine_version=$(echo "$alpine_version" | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
+										fi
+
+										# Now, alpine_version contains the stable version number (e.g., 3.17)
+										echo "Using Alpine version: $alpine_version on $arch"
+									`
+		const apkInstallTemplate = `
+										pkg=%[1]s
+										req_ver=%[2]s
+										echo "Started upgrading $pkg on $alpine_version"
+										if apk add --no-cache "$pkg"="$req_ver"; then
+  											echo "Version $req_ver for $pkg installed."
+										else
+											echo "Version $req_ver for $pkg not found — searching for alternatives..."
+
+											# Scrape all versions from Alpine package site, then sort/unique them:
+											versions=$(wget -qO- "https://pkgs.alpinelinux.org/packages?name=$pkg&branch=v$alpine_version&arch=$arch" \
+												| grep -oE "[0-9]+\.[0-9]+(\.[0-9]+)?-r[0-9]+" \
+												| sort -V | uniq)
+
+											echo "Available versions for $pkg: $versions"
+
+											# Pick the next greater version or fallback to the latest:
+											next_ver=$(printf "%%s\n" "$versions" | awk -v cur="$req_ver" '$0 > cur { print; exit }')
+											[ -z "$next_ver" ] && next_ver=$(printf "%%s\n" "$versions" | tail -n1)
+
+											echo "Selecting next version for $pkg: $next_ver"
+											apk add --no-cache "$pkg"="$next_ver"
+										fi
+									`
+
 		pkgStrings := []string{}
 		for _, u := range updates {
 			pkgStrings = append(pkgStrings, u.Name)
+			parts = append(parts, fmt.Sprintf(apkInstallTemplate, u.Name, u.FixedVersion))
 		}
-		addCmd := fmt.Sprintf(apkAddTemplate, strings.Join(pkgStrings, " "))
-		apkAdded := apkUpdated.Run(llb.Shlex(addCmd), llb.WithProxy(utils.GetProxy())).Root()
-
-		// Install all requested update packages without specifying the version. This works around:
-		//  - Reports being slightly out of date, where a newer security revision has displaced the one specified leading to not found errors.
-		//  - Reports not specifying version epochs correct (e.g. bsdutils=2.36.1-8+deb11u1 instead of with epoch as 1:2.36.1-8+dev11u1)
-		// Note that this keeps the log files from the operation, which we can consider removing as a size optimization in the future.
-		const apkInstallTemplate = `apk upgrade --no-cache %s`
-		installCmd := fmt.Sprintf(apkInstallTemplate, strings.Join(pkgStrings, " "))
-		apkInstalled = apkAdded.Run(llb.Shlex(installCmd), llb.WithProxy(utils.GetProxy())).Root()
+		fullCmd := strings.Join(parts, "\n")
+		// LINEAJE: TODO: Handle the scenario where length of the command is too long
+		installCmd := fmt.Sprintf("sh -c '%s %s'", strings.ReplaceAll(checkAlpineVersionTemplate, "'", `'\''`), strings.ReplaceAll(fullCmd, "'", `'\''`))
+		apkInstalled = apkUpdated.Run(llb.Shlex(installCmd), llb.WithProxy(utils.GetProxy())).Root()
 
 		// Write updates-manifest to host for post-patch validation
 		const outputResultsTemplate = `sh -c 'apk info --installed -v %s > %s; if [[ $? -ne 0 ]]; then echo "WARN: apk info --installed returned $?"; fi'`
