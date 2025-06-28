@@ -360,19 +360,28 @@ func (dm *dpkgManager) installUpdates(ctx context.Context, updates unversioned.U
 		}
 	}
 
-	// Install all requested update packages without specifying the version. This works around:
-	//  - Reports being slightly out of date, where a newer security revision has displaced the one specified leading to not found errors.
-	//  - Reports not specifying version epochs correct (e.g. bsdutils=2.36.1-8+deb11u1 instead of with epoch as 1:2.36.1-8+dev11u1)
+	// Install all requested update packages by specifying the version.
 	// Note that this keeps the log files from the operation, which we can consider removing as a size optimization in the future.
-
 	var installCmd string
 	if updates != nil {
-		aptGetInstallTemplate := `sh -c "apt-get install --no-install-recommends -y %s && apt-get clean -y"`
-		pkgStrings := []string{}
+		// LINEAJE: Command was updated to install the exact package version specified in the input, instead of the latest version
+		// If the specified version is not available (removed in the apt server), then bump up the package version and retry the install command
+		// The version to bump up to is based on the output of `apt-cache madison` command
+		aptGetInstallTemplate := `apt-get install --no-install-recommends -y %[1]s=%[2]s && apt-get clean -y` +
+			` || { CURRENT=$(apt-cache policy %[1]s | awk '/Installed:/ {print $2}'); ` +
+			` NEXT=$(apt-cache madison %[1]s | awk '{print $3}' | sort -V | uniq | awk -v cur='$CURRENT' '$0 > cur' | tail -n1); ` +
+			` echo 'Next version for %[1]s is: '"$NEXT"; ` +
+			` apt-get install --no-install-recommends -y %[1]s=$NEXT && apt-get clean -y;}`
+		var cmdParts []string
+		var cmd string
 		for _, u := range updates {
-			pkgStrings = append(pkgStrings, u.Name)
+			// LINEAJE: Support running multiple package installation commands
+			cmd = fmt.Sprintf(aptGetInstallTemplate, u.Name, u.FixedVersion)
+			cmdParts = append(cmdParts, cmd)
 		}
-		installCmd = fmt.Sprintf(aptGetInstallTemplate, strings.Join(pkgStrings, " "))
+		fullCmd := strings.Join(cmdParts, " && ")
+		// LINEAJE: TODO: Handle the scenario where length of the command is too long
+		installCmd = fmt.Sprintf(`sh -c "%s"`, fullCmd)
 	} else {
 		// if updates is not specified, update all packages
 		installCmd = `sh -c "output=$(apt-get upgrade -y && apt-get clean -y && apt-get autoremove -y 2>&1); if [ $? -ne 0 ]; then echo "$output" >>error_log.txt; fi"`
