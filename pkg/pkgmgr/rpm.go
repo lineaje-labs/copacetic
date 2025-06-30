@@ -16,6 +16,7 @@ import (
 	rpmVer "github.com/knqyf263/go-rpm-version"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/project-copacetic/copacetic/pkg/buildkit"
+	"github.com/project-copacetic/copacetic/pkg/types"
 	"github.com/project-copacetic/copacetic/pkg/types/unversioned"
 	"github.com/project-copacetic/copacetic/pkg/utils"
 	log "github.com/sirupsen/logrus"
@@ -200,7 +201,9 @@ func getRPMDBType(b []byte) rpmDBType {
 	}
 }
 
-func (rm *rpmManager) InstallUpdates(ctx context.Context, manifest *unversioned.UpdateManifest, ignoreErrors bool) (*llb.State, []string, error) {
+func (rm *rpmManager) InstallUpdates(
+	ctx context.Context, manifest *unversioned.UpdateManifest, ignoreErrors bool,
+) (*llb.State, []string, []types.PatchDetail, []types.PatchDetail, error) {
 	// Resolve set of unique packages to update if UpdateManifest provided, else update all
 	var updates unversioned.UpdatePackages
 	var rpmComparer VersionComparer
@@ -210,17 +213,17 @@ func (rm *rpmManager) InstallUpdates(ctx context.Context, manifest *unversioned.
 		if manifest.Metadata.OS.Type == "oracle" && !ignoreErrors {
 			err = errors.New("detected Oracle image passed in\n" +
 				"Please read https://project-copacetic.github.io/copacetic/website/troubleshooting before patching your Oracle image")
-			return &rm.config.ImageState, nil, err
+			return &rm.config.ImageState, nil, nil, nil, err
 		}
 
 		rpmComparer = VersionComparer{isValidRPMVersion, isLessThanRPMVersion}
 		updates, err = GetUniqueLatestUpdates(manifest.Updates, rpmComparer, ignoreErrors)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 		if len(updates) == 0 {
 			log.Warn("No update packages were specified to apply")
-			return &rm.config.ImageState, nil, nil
+			return &rm.config.ImageState, nil, nil, nil, nil
 		}
 		log.Debugf("latest unique RPMs: %v", updates)
 	}
@@ -232,7 +235,7 @@ func (rm *rpmManager) InstallUpdates(ctx context.Context, manifest *unversioned.
 	}
 
 	if err := rm.probeRPMStatus(ctx, toolImageName); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	var updatedImageState *llb.State
@@ -240,25 +243,26 @@ func (rm *rpmManager) InstallUpdates(ctx context.Context, manifest *unversioned.
 	if rm.isDistroless {
 		updatedImageState, resultManifestBytes, err = rm.unpackAndMergeUpdates(ctx, updates, toolImageName, ignoreErrors)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 	} else {
 		updatedImageState, resultManifestBytes, err = rm.installUpdates(ctx, updates, ignoreErrors)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 	}
 
 	var errPkgs []string
+	var patchesApplied, patchesFailed []types.PatchDetail
 	if manifest != nil {
 		// Validate that the deployed packages are of the requested version or better
-		errPkgs, err = validateRPMPackageVersions(updates, rpmComparer, resultManifestBytes, ignoreErrors)
+		errPkgs, patchesApplied, patchesFailed, err = validateRPMPackageVersions(updates, rpmComparer, resultManifestBytes, ignoreErrors)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 	}
 
-	return updatedImageState, errPkgs, nil
+	return updatedImageState, errPkgs, patchesApplied, patchesFailed, nil
 }
 
 func (rm *rpmManager) probeRPMStatus(ctx context.Context, toolImage string) error {
@@ -881,10 +885,12 @@ func getJSONPackageData(packageInfo map[string]string) ([]byte, error) {
 	return data, nil
 }
 
-func validateRPMPackageVersions(updates unversioned.UpdatePackages, cmp VersionComparer, resultsBytes []byte, ignoreErrors bool) ([]string, error) {
+func validateRPMPackageVersions(
+	updates unversioned.UpdatePackages, cmp VersionComparer, resultsBytes []byte, ignoreErrors bool,
+) ([]string, []types.PatchDetail, []types.PatchDetail, error) {
 	lines, err := rpmReadResultsManifest(resultsBytes)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	// Not strictly necessary, but sort the two lists to not take a dependency on the
@@ -903,7 +909,7 @@ func validateRPMPackageVersions(updates unversioned.UpdatePackages, cmp VersionC
 	if len(lines) > len(updates) {
 		err = fmt.Errorf("expected %d updates, installed %d", len(updates), len(lines))
 		log.Error(err)
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	// Walk files and check update name is prefix for file name
@@ -911,6 +917,7 @@ func validateRPMPackageVersions(updates unversioned.UpdatePackages, cmp VersionC
 	// using the resultQueryFormat with tab delimiters.
 	var allErrors *multierror.Error
 	var errorPkgs []string
+	var patchesApplied, patchesFailed []types.PatchDetail
 	lineIndex := 0
 	for _, update := range updates {
 		expectedPrefix := update.Name + "\t"
@@ -923,9 +930,12 @@ func validateRPMPackageVersions(updates unversioned.UpdatePackages, cmp VersionC
 		archIndex := strings.LastIndex(lines[lineIndex], "\t")
 		version := strings.TrimPrefix(lines[lineIndex][:archIndex], expectedPrefix)
 
-		// LINEAJE: Set the actual package version installed to prevent the caller from detecting a version mismatch
-		if (cmp.IsValid(version) && cmp.LessThan(version, update.FixedVersion)) || version != update.FixedVersion {
-			update.FixedVersion = version
+		// LINEAJE: Capture the status of the patch that was applied
+		patchDetail, patchError := FetchPatchDetail(&update, version, cmp)
+		if patchError == nil {
+			patchesApplied = append(patchesApplied, patchDetail)
+		} else {
+			patchesFailed = append(patchesFailed, patchDetail)
 		}
 
 		lineIndex++
@@ -950,8 +960,8 @@ func validateRPMPackageVersions(updates unversioned.UpdatePackages, cmp VersionC
 	}
 
 	if ignoreErrors {
-		return errorPkgs, nil
+		return errorPkgs, patchesApplied, patchesFailed, nil
 	}
 
-	return errorPkgs, allErrors.ErrorOrNil()
+	return errorPkgs, patchesApplied, patchesFailed, allErrors.ErrorOrNil()
 }

@@ -23,6 +23,8 @@ func TryOutputVexDocument(updates *unversioned.UpdateManifest, pkgType, patchedI
 		if err != nil {
 			return err
 		}
+	case "lineaje": // LINEAJE: Nothing to do here for this format
+		return nil
 	default:
 		return fmt.Errorf("unsupported output format %s specified", format)
 	}

@@ -12,6 +12,7 @@ import (
 	apkVer "github.com/knqyf263/go-apk-version"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/project-copacetic/copacetic/pkg/buildkit"
+	"github.com/project-copacetic/copacetic/pkg/types"
 	"github.com/project-copacetic/copacetic/pkg/types/unversioned"
 	"github.com/project-copacetic/copacetic/pkg/utils"
 	log "github.com/sirupsen/logrus"
@@ -49,17 +50,19 @@ func apkReadResultsManifest(b []byte) ([]string, error) {
 	return lines, nil
 }
 
-func validateAPKPackageVersions(updates unversioned.UpdatePackages, cmp VersionComparer, resultsBytes []byte, ignoreErrors bool) ([]string, error) {
+func validateAPKPackageVersions(
+	updates unversioned.UpdatePackages, cmp VersionComparer, resultsBytes []byte, ignoreErrors bool,
+) ([]string, []types.PatchDetail, []types.PatchDetail, error) {
 	lines, err := apkReadResultsManifest(resultsBytes)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	// Assert apk info list doesn't contain more entries than expected
 	if len(lines) > len(updates) {
 		err = fmt.Errorf("expected %d updates, installed %d", len(updates), len(lines))
 		log.Error(err)
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	// Not strictly necessary, but sort the two lists to not take a dependency on the
@@ -82,6 +85,7 @@ func validateAPKPackageVersions(updates unversioned.UpdatePackages, cmp VersionC
 	// ...
 	var allErrors *multierror.Error
 	var errorPkgs []string
+	var patchesApplied, patchesFailed []types.PatchDetail
 	lineIndex := 0
 	for _, update := range updates {
 		expectedPrefix := update.Name + "-"
@@ -93,9 +97,12 @@ func validateAPKPackageVersions(updates unversioned.UpdatePackages, cmp VersionC
 		// Found a match, trim prefix- to get version string
 		version := strings.TrimPrefix(lines[lineIndex], expectedPrefix)
 
-		// LINEAJE: Set the actual package version installed to prevent the caller from detecting a version mismatch
-		if (cmp.IsValid(version) && cmp.LessThan(version, update.FixedVersion)) || version != update.FixedVersion {
-			update.FixedVersion = version
+		// LINEAJE: Capture the status of the patch that was applied
+		patchDetail, patchError := FetchPatchDetail(&update, version, cmp)
+		if patchError == nil {
+			patchesApplied = append(patchesApplied, patchDetail)
+		} else {
+			patchesFailed = append(patchesFailed, patchDetail)
 		}
 
 		lineIndex++
@@ -117,47 +124,49 @@ func validateAPKPackageVersions(updates unversioned.UpdatePackages, cmp VersionC
 	}
 
 	if ignoreErrors {
-		return errorPkgs, nil
+		return errorPkgs, patchesApplied, patchesFailed, nil
 	}
 
-	return errorPkgs, allErrors.ErrorOrNil()
+	return errorPkgs, patchesApplied, patchesFailed, allErrors.ErrorOrNil()
 }
 
-func (am *apkManager) InstallUpdates(ctx context.Context, manifest *unversioned.UpdateManifest, ignoreErrors bool) (*llb.State, []string, error) {
+func (am *apkManager) InstallUpdates(
+	ctx context.Context, manifest *unversioned.UpdateManifest, ignoreErrors bool,
+) (*llb.State, []string, []types.PatchDetail, []types.PatchDetail, error) {
 	// If manifest is nil, update all packages
 	if manifest == nil {
 		updatedImageState, _, err := am.upgradePackages(ctx, nil, ignoreErrors)
 		if err != nil {
-			return updatedImageState, nil, err
+			return updatedImageState, nil, nil, nil, err
 		}
 		// add validation in the future
-		return updatedImageState, nil, nil
+		return updatedImageState, nil, nil, nil, nil
 	}
 
 	// Resolve set of unique packages to update
 	apkComparer := VersionComparer{isValidAPKVersion, isLessThanAPKVersion}
 	updates, err := GetUniqueLatestUpdates(manifest.Updates, apkComparer, ignoreErrors)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 	if len(updates) == 0 {
 		log.Warn("No update packages were specified to apply")
-		return &am.config.ImageState, nil, nil
+		return &am.config.ImageState, nil, nil, nil, nil
 	}
 	log.Debugf("latest unique APKs: %v", updates)
 
 	updatedImageState, resultsBytes, err := am.upgradePackages(ctx, updates, ignoreErrors)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 
 	// Validate that the deployed packages are of the requested version or better
-	errPkgs, err := validateAPKPackageVersions(updates, apkComparer, resultsBytes, ignoreErrors)
+	errPkgs, patchesApplied, patchesFailed, err := validateAPKPackageVersions(updates, apkComparer, resultsBytes, ignoreErrors)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, patchesApplied, patchesFailed, err
 	}
 
-	return updatedImageState, errPkgs, nil
+	return updatedImageState, errPkgs, patchesApplied, patchesFailed, nil
 }
 
 // Patch a regular alpine image with:

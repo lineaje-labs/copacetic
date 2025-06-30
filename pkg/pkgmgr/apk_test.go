@@ -167,7 +167,7 @@ func TestValidateAPKPackageVersions(t *testing.T) {
 		// Use t.Run to run each test case as a subtest
 		t.Run(tc.name, func(t *testing.T) {
 			// Run the function to be tested
-			errorPkgs, err := validateAPKPackageVersions(tc.updates, tc.cmp, tc.resultsBytes, tc.ignoreErrors)
+			errorPkgs, _, _, err := validateAPKPackageVersions(tc.updates, tc.cmp, tc.resultsBytes, tc.ignoreErrors)
 			if tc.expectedError != "" {
 				if !strings.Contains(err.Error(), tc.expectedError) {
 					t.Errorf("expected error %v, got %v", tc.expectedError, err.Error())
@@ -256,7 +256,7 @@ func Test_InstallUpdates_APK(t *testing.T) {
 			expectedError: "",
 		},
 		{
-			name: "Ignore errors as version mismatch does not generate any error now",
+			name: "Ignore errors",
 			manifest: &unversioned.UpdateManifest{
 				Updates: unversioned.UpdatePackages{
 					{Name: "package1", FixedVersion: "2.0.0"},
@@ -267,7 +267,7 @@ func Test_InstallUpdates_APK(t *testing.T) {
 				mr.On("ReadFile", mock.Anything, mock.Anything).Return([]byte("package1-1.0.1\n"), nil)
 			},
 			expectedState: true,
-			expectedPkgs:  nil,
+			expectedPkgs:  []string{"package1"},
 			expectedError: "",
 		},
 	}
@@ -294,7 +294,7 @@ func Test_InstallUpdates_APK(t *testing.T) {
 				workingFolder: "/tmp",
 			}
 
-			state, pkgs, err := am.InstallUpdates(context.TODO(), tt.manifest, tt.ignoreErrors)
+			state, pkgs, _, _, err := am.InstallUpdates(context.TODO(), tt.manifest, tt.ignoreErrors)
 
 			if tt.expectedError != "" {
 				assert.Error(t, err)
