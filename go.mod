@@ -1,4 +1,4 @@
-module github.com/project-copacetic/copacetic
+module github.com/lineaje-labs/copacetic
 
 go 1.24.2
 
@@ -21,6 +21,7 @@ require (
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.1.1
 	github.com/openvex/go-vex v0.2.5
+	github.com/project-copacetic/copacetic v0.10.0
 	github.com/quay/claircore v1.5.37
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.9.1
@@ -51,7 +52,6 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/docker/distribution v2.8.3+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.9.3 // indirect
-	github.com/docker/go v1.5.1-1 // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/fatih/color v1.18.0 // indirect
@@ -96,7 +96,6 @@ require (
 	github.com/quay/claircore/toolkit v1.2.4 // indirect
 	github.com/quay/zlog v1.1.8 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/rs/zerolog v1.30.0 // indirect
 	github.com/sagikazarmark/locafero v0.7.0 // indirect
 	github.com/samber/lo v1.50.0 // indirect
@@ -140,6 +139,7 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250313205543-e70fdf4c4cb4 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gotest.tools/v3 v3.4.0 // indirect
 	k8s.io/utils v0.0.0-20241104100929-3ea5e8cea738 // indirect
 )
+
+replace github.com/project-copacetic/copacetic => github.com/lineaje-labs/copacetic v0.10.1-0.20250630201620-9249184801fb
