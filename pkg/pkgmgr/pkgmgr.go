@@ -6,10 +6,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/aquasecurity/trivy/pkg/purl"
 	"github.com/hashicorp/go-multierror"
 	"github.com/moby/buildkit/client/llb"
 	"github.com/moby/buildkit/frontend/gateway/client"
 	"github.com/project-copacetic/copacetic/pkg/buildkit"
+	"github.com/project-copacetic/copacetic/pkg/types"
 	"github.com/project-copacetic/copacetic/pkg/types/unversioned"
 	log "github.com/sirupsen/logrus"
 )
@@ -25,7 +27,7 @@ const (
 )
 
 type PackageManager interface {
-	InstallUpdates(context.Context, *unversioned.UpdateManifest, bool) (*llb.State, []string, error)
+	InstallUpdates(context.Context, *unversioned.UpdateManifest, bool) (*llb.State, []string, []types.PatchDetail, []types.PatchDetail, error)
 	GetPackageType() string
 }
 
@@ -89,8 +91,19 @@ func GetUniqueLatestUpdates(updates unversioned.UpdatePackages, cmp VersionCompa
 	}
 
 	out := unversioned.UpdatePackages{}
+	// LINEAJE: Add the unique packages to the output list and preserve the PURL information
 	for k, v := range dict {
-		out = append(out, unversioned.UpdatePackage{Name: k, FixedVersion: v})
+		var added bool
+		for _, u := range updates {
+			if u.Name == k {
+				out = append(out, unversioned.UpdatePackage{Name: u.Name, FixedVersion: v, InstalledPURL: u.InstalledPURL, FixedPURL: u.FixedPURL})
+				added = true
+				break
+			}
+		}
+		if !added {
+			out = append(out, unversioned.UpdatePackage{Name: k, FixedVersion: v})
+		}
 	}
 	return out, nil
 }
@@ -181,4 +194,36 @@ func tryImage(ctx context.Context, imageRef string, c client.Client) (llb.State,
 		return llb.State{}, fmt.Errorf("failed to resolve %s: %w", imageRef, err)
 	}
 	return st, nil
+}
+
+func NewPatchDetail(update unversioned.UpdatePackage, version string) types.PatchDetail {
+	var packageInfo types.PatchDetail
+	packageInfo.Package = update.Name
+	packageInfo.InputVersion = update.FixedVersion
+	packageInfo.OutputVersion = version
+	packageInfo.InstalledPURL = update.InstalledPURL
+	packageInfo.FixedPURL = update.FixedPURL
+	return packageInfo
+}
+
+func FetchPatchDetail(
+	update *unversioned.UpdatePackage, version string, cmp VersionComparer,
+) (types.PatchDetail, error) {
+	var err error
+	patchDetail := NewPatchDetail(*update, version)
+	if cmp.IsValid(version) {
+		if cmp.LessThan(version, update.FixedVersion) {
+			err = fmt.Errorf("version applied %s is lower than the expected fixed version - %s", version, update.FixedVersion)
+		} else if version != update.FixedVersion { // Update the Fixed PURL
+			if purlInstance, purlInstanceError := purl.FromString(patchDetail.FixedPURL); purlInstanceError == nil {
+				purlInstance.Version = version
+				patchDetail.FixedPURL = purlInstance.String()
+			}
+			// LINEAJE: Set the actual package version installed to prevent the caller from detecting a version mismatch
+			update.FixedVersion = version
+		}
+	} else {
+		err = fmt.Errorf("version applied %s is not a valid version, expected fixed version - %s", version, update.FixedVersion)
+	}
+	return patchDetail, err
 }

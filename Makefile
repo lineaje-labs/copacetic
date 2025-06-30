@@ -17,12 +17,13 @@ BASE_PACKAGE_NAME := github.com/project-copacetic/copacetic
 GIT_COMMIT        := $(shell git rev-list -1 HEAD)
 GIT_VERSION       := $(shell git describe --always --tags --dirty)
 BUILD_DATE        := $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
+GOARCH            := $(shell go env GOARCH)
+GOOS              := $(shell go env GOOS)
 DEFAULT_LDFLAGS   := -X $(BASE_PACKAGE_NAME)/pkg/version.GitCommit=$(GIT_COMMIT) \
   -X $(BASE_PACKAGE_NAME)/pkg/version.GitVersion=$(GIT_VERSION) \
   -X $(BASE_PACKAGE_NAME)/pkg/version.BuildDate=$(BUILD_DATE) \
+  -X $(BASE_PACKAGE_NAME)/pkg/output/lineaje.version=$(CLI_VERSION)_$(GOOS)_$(GOARCH) \
   -X main.version=$(CLI_VERSION)
-GOARCH            := $(shell go env GOARCH)
-GOOS              := $(shell go env GOOS)
 
 # Message lack of native build support in Windows
 ifeq ($(GOOS),windows)
@@ -41,7 +42,7 @@ else
 endif
 
 # Build output variables
-CLI_BINARY        := copa
+CLI_BINARY        := copa_$(CLI_VERSION)_$(GOOS)_$(GOARCH)
 OUT_DIR           := ./dist
 BINS_OUT_DIR      ?= $(OUT_DIR)/$(GOOS)_$(GOARCH)/$(BUILDTYPE_DIR)
 

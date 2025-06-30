@@ -54,6 +54,7 @@ require (
 	github.com/docker/go v1.5.1-1 // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
+	github.com/fatih/color v1.18.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/fvbommel/sortorder v1.1.0 // indirect
@@ -140,4 +141,5 @@ require (
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gotest.tools/v3 v3.4.0 // indirect
+	k8s.io/utils v0.0.0-20241104100929-3ea5e8cea738 // indirect
 )

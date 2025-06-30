@@ -311,7 +311,7 @@ func TestValidateRPMPackageVersions(t *testing.T) {
 			ignoreErrors: false,
 		},
 		{
-			name: "downloaded package version lower than required does not generate any error now",
+			name: "downloaded package version lower than required",
 			updates: unversioned.UpdatePackages{
 				{Name: "openssl", FixedVersion: "3.1.1k-21.cm2"},
 				{Name: "openssl-libs", FixedVersion: "3.1.1k-21.cm2"},
@@ -319,8 +319,10 @@ func TestValidateRPMPackageVersions(t *testing.T) {
 			cmp:          rpmComparer,
 			resultsBytes: rpmValidManifest,
 			ignoreErrors: false,
-			expectedError: "",
-			expectedErrPkgs: nil,
+			expectedError: `2 errors occurred:
+	* downloaded package openssl version 2.1.1k-21.cm2 lower than required 3.1.1k-21.cm2 for update
+	* downloaded package openssl-libs version 2.1.1k-21.cm2 lower than required 3.1.1k-21.cm2 for update`,
+			expectedErrPkgs: []string{"openssl", "openssl-libs"},
 		},
 		{
 			name: "downloaded package version lower than required with ignore errors",
@@ -345,7 +347,7 @@ func TestValidateRPMPackageVersions(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			errorPkgs, err := validateRPMPackageVersions(tc.updates, tc.cmp, tc.resultsBytes, tc.ignoreErrors)
+			errorPkgs, _, _, err := validateRPMPackageVersions(tc.updates, tc.cmp, tc.resultsBytes, tc.ignoreErrors)
 			if tc.expectedError != "" && err != nil {
 				if !strings.Contains(err.Error(), tc.expectedError) {
 					t.Errorf("expected error %v, got %v", tc.expectedError, err.Error())

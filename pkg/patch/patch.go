@@ -17,6 +17,7 @@ import (
 	"github.com/containerd/platforms"
 	"github.com/docker/buildx/build"
 	"github.com/docker/cli/cli/config"
+	output2 "github.com/project-copacetic/copacetic/pkg/output"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/exp/slices"
 	"golang.org/x/sync/errgroup"
@@ -132,19 +133,25 @@ func Patch(
 	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
+	startTime := time.Now().Format(time.RFC3339)
+	_ = os.Remove(output) // Delete existing file
 	ch := make(chan error)
 	go func() {
-		ch <- patchWithContext(timeoutCtx, ch, image, reportFile, reportDirectory, platformSpecificErrors, patchedTag, suffix, workingFolder, scanner, format, output, ignoreError, push, bkOpts)
+		ch <- patchWithContext(timeoutCtx, ch, image, reportFile, reportDirectory, platformSpecificErrors, patchedTag, suffix, workingFolder, scanner, format, output, startTime, ignoreError, push, bkOpts)
 	}()
 
 	select {
 	case err := <-ch:
+		// LINEAJE: In case it failed early, then save the error in the output file for processing
+		output2.Save(err, nil, format, output, startTime)
 		return err
 	case <-timeoutCtx.Done():
 		// add a grace period for long running deferred cleanup functions to complete
 		<-time.After(1 * time.Second)
 
 		err := fmt.Errorf("patch exceeded timeout %v", timeout)
+		// LINEAJE: In case it failed due to timeout, then save the error in the output file for processing
+		output2.Save(err, nil, format, output, startTime)
 		log.Error(err)
 		return err
 	}
@@ -162,7 +169,7 @@ func removeIfNotDebug(workingFolder string) {
 func patchWithContext(
 	ctx context.Context,
 	ch chan error,
-	image, reportFile, reportDirectory, platformSpecificErrors, patchedTag, suffix, workingFolder, scanner, format, output string,
+	image, reportFile, reportDirectory, platformSpecificErrors, patchedTag, suffix, workingFolder, scanner, format, output, startTime string,
 	ignoreError, push bool,
 	bkOpts buildkit.Opts,
 ) error {
@@ -199,6 +206,8 @@ func patchWithContext(
 		if err == nil && result != nil {
 			log.Infof("Patched image (%s): %s\n", platform.OS+"/"+platform.Architecture, result.PatchedRef.String())
 		}
+		// LINEAJE: Save the output result. For error, it will be saved with the proper message.
+		output2.Save(err, result, format, output, startTime)
 		return err
 	} else if reportDirectory == "" && reportFile == "" {
 		platform := types.PatchPlatform{
@@ -209,8 +218,10 @@ func patchWithContext(
 		}
 		result, err := patchSingleArchImage(ctx, ch, image, reportFile, patchedTag, suffix, workingFolder, scanner, format, output, platform, ignoreError, push, bkOpts, false)
 		if err == nil && result != nil && result.PatchedRef != nil {
-			log.Infof("Patched image (%s): %s\n", platform.OS+"/"+platform.Architecture, result.PatchedRef)
+			log.Infof("Patched image (%s): %s\n", platform.OS+"/"+platform.Architecture, result.PatchedRef.String())
 		}
+		// LINEAJE: Save the output result. For error, it will be saved with the proper message.
+		output2.Save(err, result, format, output, startTime)
 		return err
 	}
 
@@ -223,7 +234,7 @@ func patchWithContext(
 		return fmt.Errorf("provided report directory path %s is not a directory", reportDirectory)
 	}
 
-	return patchMultiArchImage(ctx, ch, platformSpecificErrors, image, reportDirectory, patchedTag, suffix, workingFolder, scanner, format, output, ignoreError, push, bkOpts)
+	return patchMultiArchImage(ctx, ch, platformSpecificErrors, image, reportDirectory, patchedTag, suffix, workingFolder, scanner, format, output, startTime, ignoreError, push, bkOpts)
 }
 
 func patchSingleArchImage(
@@ -400,6 +411,9 @@ func patchSingleArchImage(
 		}
 	}
 
+	var patchesApplied []types.PatchDetail
+	var patchesFailed []types.PatchDetail
+	var patchedImageDigest string
 	// Create a channel to receive the patched image digest
 	buildChannel := make(chan *client.SolveStatus)
 	eg, ctx := errgroup.WithContext(ctx)
@@ -429,7 +443,6 @@ func patchSingleArchImage(
 				ch <- err
 				return nil, err
 			}
-
 			// Create package manager helper
 			var manager pkgmgr.PackageManager
 			if reportFile == "" {
@@ -492,10 +505,13 @@ func patchSingleArchImage(
 			}
 
 			// Export the patched image state to Docker
-			patchedImageState, errPkgs, err := manager.InstallUpdates(ctx, updates, ignoreError)
-			if err != nil {
-				ch <- err
-				return nil, err
+			var patchedImageState *llb.State
+			var errPkgs []string
+			var installError error
+			patchedImageState, errPkgs, patchesApplied, patchesFailed, installError = manager.InstallUpdates(ctx, updates, ignoreError)
+			if installError != nil {
+				ch <- installError
+				return nil, installError
 			}
 
 			def, err := patchedImageState.Marshal(ctx, llb.Platform(targetPlatform.Platform))
@@ -534,7 +550,6 @@ func patchSingleArchImage(
 		}, buildChannel)
 
 		// Currently can only validate updates if updating via scanner
-		var patchedImageDigest string
 		if err == nil && solveResponse != nil {
 			digest := solveResponse.ExporterResponse[exptypes.ExporterImageDigestKey]
 			patchedImageDigest = digest
@@ -608,10 +623,15 @@ func patchSingleArchImage(
 		return nil, fmt.Errorf("failed to parse patched image name %s: %w", patchedImageName, err)
 	}
 
+	// LINEAJE: Set the Successful and Failed patch details, so that the output can be saved.
 	return &types.PatchResult{
-		OriginalRef: imageName,
-		PatchedRef:  patchedRef,
-		PatchedDesc: patchedDesc,
+		PluginVersion:      updates.PluginVersion,
+		OriginalRef:        imageName,
+		PatchedRef:         patchedRef,
+		PatchedDesc:        patchedDesc,
+		PatchedImageDigest: patchedImageDigest,
+		PatchesApplied:     patchesApplied,
+		PatchesFailed:      patchesFailed,
 	}, nil
 }
 
@@ -799,7 +819,7 @@ func getRepoNameWithDigest(patchedImageName, imageDigest string) string {
 func patchMultiArchImage(
 	ctx context.Context,
 	ch chan error,
-	platformSpecificErrors, image, reportDir, patchedTag, suffix, workingFolder, scanner, format, output string,
+	platformSpecificErrors, image, reportDir, patchedTag, suffix, workingFolder, scanner, format, output, startTime string,
 	ignoreError, push bool,
 	bkOpts buildkit.Opts,
 ) error {
@@ -840,14 +860,20 @@ func patchMultiArchImage(
 				return gctx.Err()
 			}
 			defer func() { <-sem }()
-
 			res, err := patchSingleArchImage(gctx, ch, image, p.ReportFile, patchedTag, suffix, workingFolder, scanner, format, output, p, ignoreError, push, bkOpts, true)
+			var patchMessageError error
 			if err != nil {
-				return handlePlatformErr(p, err)
+				patchMessageError = handlePlatformErr(p, err)
 			} else if res == nil {
-				return fmt.Errorf("patchSingleArchImage returned nil result for platform %s", p.OS+"/"+p.Architecture)
+				patchMessageError = fmt.Errorf("patchSingleArchImage returned nil result for platform %s", p.OS+"/"+p.Architecture)
 			}
-
+			if patchMessageError != nil {
+				// LINEAJE: Save the error output
+				output2.Save(patchMessageError, res, format, output, startTime)
+				return patchMessageError
+			}
+			// LINEAJE: Save the output as per platform. TODO: Add support to consolidate this output.
+			output2.Save(nil, res, format, strings.ReplaceAll(output, ".json", fmt.Sprintf("%s-%s.json", p.OS, p.Architecture)), startTime)
 			mu.Lock()
 			patchResults = append(patchResults, *res)
 			mu.Unlock()
