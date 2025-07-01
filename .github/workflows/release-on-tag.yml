@@ -38,7 +38,7 @@ jobs:
       - name: Determine Archive Name
         id: get_archive_name
         # Produces an archive name like copacetic-1.0.0_linux_amd64.tar.gz
-        run: echo "name=copacetic-${{ steps.get_version.outputs.version }}_linux_amd64.tar.gz" >> $GITHUB_OUTPUT
+        run: echo "name=copacetic-${{ inputs.CLI_VERSION }}_linux_amd64.tar.gz" >> $GITHUB_OUTPUT
 
       - name: Create Release Archive
         run: |
