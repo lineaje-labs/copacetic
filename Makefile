@@ -42,7 +42,7 @@ else
 endif
 
 # Build output variables
-CLI_BINARY        := copa_$(CLI_VERSION)_$(GOOS)_$(GOARCH)
+CLI_BINARY        := copa
 OUT_DIR           := ./dist
 BINS_OUT_DIR      ?= $(OUT_DIR)/$(GOOS)_$(GOARCH)/$(BUILDTYPE_DIR)
 
