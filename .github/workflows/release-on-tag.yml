@@ -1,0 +1,60 @@
+name: Create GitHub Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      CLI_VERSION:
+        description: 'CLI Version (e.g., 1.0.0)'
+        required: true
+        type: string
+      TAG_NAME:
+        description: 'Tag for the release (e.g., v1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  release:
+    name: Build Release Assets
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      release_archive_name: ${{ steps.get_archive_name.outputs.name }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.TAG_NAME }} # Checkout the specified tag
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24' # Updated Go version
+
+      - name: Run build
+        run: |
+          make CLI_VERSION=${{ inputs.CLI_VERSION }}
+
+      - name: Determine Archive Name
+        id: get_archive_name
+        # Produces an archive name like copacetic-1.0.0_linux_amd64.tar.gz
+        run: echo "name=copacetic-${{ steps.get_version.outputs.version }}_linux_amd64.tar.gz" >> $GITHUB_OUTPUT
+
+      - name: Create Release Archive
+        run: |
+          tar -czvf ${{ steps.get_archive_name.outputs.name }} -C dist/linux_amd64/release/ .
+
+      - name: Create Release and Upload Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.get_archive_name.outputs.name }}
+          tag_name: ${{ inputs.TAG_NAME }} # Release on the specified tag
+          # The release will be created for the tag that triggered the workflow.
+          # GITHUB_TOKEN is automatically provided.
+          # Customize the release name and body if needed, e.g.:
+          # name: Release ${{ github.ref_name }}
+          # body: "Automated release for version ${{ github.ref_name }}"
+          # Prerelease will be marked if the tag contains a hyphen (e.g., v1.0.0-alpha)
+          # This is a default behavior of softprops/action-gh-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

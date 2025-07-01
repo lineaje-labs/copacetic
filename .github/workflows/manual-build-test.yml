@@ -1,0 +1,59 @@
+name: Manual Build and Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref_type:
+        description: 'The type of ref to checkout (branch or tag)'
+        required: true
+        default: 'branch'
+        type: choice
+        options:
+        - branch
+        - tag
+      ref_name:
+        description: 'The name of the branch or tag to checkout'
+        required: true
+        type: string
+      version:
+        description: 'Optional version to pass to the build (e.g., 1.0.0)'
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.ref_type == 'branch' && format('refs/heads/{0}', github.event.inputs.ref_name) || format('refs/tags/{0}', github.event.inputs.ref_name) }}
+
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24' # Consistent Go version
+
+      - name: Configure Docker daemon for containerd snapshotter
+        run: |
+          echo '{"features": { "containerd-snapshotter": true }}' | sudo tee /etc/docker/daemon.json
+          sudo systemctl restart docker
+
+      - name: Build Copacetic CLI
+        run: |
+          if [[ -n "${{ github.event.inputs.version }}" ]]; then
+            make CLI_VERSION=${{ github.event.inputs.version }}
+          else
+            make
+          fi
+
+      - name: Test
+        run: make test
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: dist/linux_amd64/release/
