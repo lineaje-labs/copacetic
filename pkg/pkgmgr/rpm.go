@@ -516,7 +516,7 @@ func (rm *rpmManager) installUpdates(ctx context.Context, updates unversioned.Up
     										)
   										else
     										versions=$(
-      											"$TOOL" list available "${$PKG}.${ARCH}" --showduplicates 2>/dev/null \
+      											"$TOOL" list available "${PKG}.${ARCH}" --showduplicates 2>/dev/null \
         											| awk "{print \$2}" | sort -V | uniq
     										)
   										fi
