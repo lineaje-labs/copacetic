@@ -1,0 +1,45 @@
+{
+  "schema_no": "1.0",
+  "status": "success",
+  "message": "",
+  "image_details": {
+    "platform": "local",
+    "patched_image": "docker.io/library/alpine:3.17.0_rc1-patched",
+    "patched_image_digest": "sha256:87730f000475c1167e8f27e9eb1687574d1db7b5dafb67c4e594367467fc1abb"
+  },
+  "patches_applied": [
+    {
+      "input_purl": "pkg:apk/alpine/busybox@1.35.0-r27?arch=x86_64\u0026distro=alpine-3.17.0_rc1",
+      "fixed_purl": "pkg:apk/alpine/busybox@1.35.0-r31"
+    },
+    {
+      "input_purl": "pkg:apk/alpine/busybox-binsh@1.35.0-r27?arch=x86_64\u0026distro=alpine-3.17.0_rc1\u0026upstream=busybox",
+      "fixed_purl": "pkg:apk/alpine/busybox-binsh@1.35.0-r31"
+    },
+    {
+      "input_purl": "pkg:apk/alpine/libcrypto3@3.0.7-r0?arch=x86_64\u0026distro=alpine-3.17.0_rc1\u0026upstream=openssl",
+      "fixed_purl": "pkg:apk/alpine/libcrypto3@3.0.15-r1"
+    },
+    {
+      "input_purl": "pkg:apk/alpine/libssl3@3.0.7-r0?arch=x86_64\u0026distro=alpine-3.17.0_rc1\u0026upstream=openssl",
+      "fixed_purl": "pkg:apk/alpine/libssl3@3.0.15-r1"
+    },
+    {
+      "input_purl": "pkg:apk/alpine/musl@1.2.3-r4?arch=x86_64\u0026distro=alpine-3.17.0_rc1",
+      "fixed_purl": "pkg:apk/alpine/musl@1.2.3-r6"
+    },
+    {
+      "input_purl": "pkg:apk/alpine/musl-utils@1.2.3-r4?arch=x86_64\u0026distro=alpine-3.17.0_rc1\u0026upstream=musl",
+      "fixed_purl": "pkg:apk/alpine/musl-utils@1.2.3-r6"
+    },
+    {
+      "input_purl": "pkg:apk/alpine/ssl_client@1.35.0-r27?arch=x86_64\u0026distro=alpine-3.17.0_rc1\u0026upstream=busybox",
+      "fixed_purl": "pkg:apk/alpine/ssl_client@1.35.0-r31"
+    }
+  ],
+  "patches_failed": {},
+  "copacetic_version": "copacetic ",
+  "start_time": "2025-06-30T20:06:32-07:00",
+  "end_time": "2025-06-30T20:06:38-07:00",
+  "scanner_version": "copa-lineaje-scanner version 0.0.1-2025"
+}
