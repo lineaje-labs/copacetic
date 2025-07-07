@@ -13,10 +13,10 @@ type testContainer struct {
 	URI string
 }
 
-func setupTestContainer(ctx context.Context, testContainerName string) (*testContainer, error) {
+func setupTestContainer(ctx context.Context, testContainerName string, reusableContainerName string) (*testContainer, error) {
 	req := testcontainers.ContainerRequest{
 		Image:      testContainerName,
-		Name:       testContainerName,
+		Name:       reusableContainerName,
 		SkipReaper: true,
 	}
 	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{

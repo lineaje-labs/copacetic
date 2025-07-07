@@ -29,6 +29,7 @@ func TestIntegrationDPKG(t *testing.T) {
 		expectedOutputFilePath string
 		actualOutputFilePath   string
 		testContainerName      string
+		reusableContainerName  string
 		args                   []string
 		wantErr                bool
 	}{
@@ -38,6 +39,7 @@ func TestIntegrationDPKG(t *testing.T) {
 			expectedOutputFilePath: "testresources/dpkg/expectedoutput/debian_expected_output.json",
 			actualOutputFilePath:   "debian_actual_output.json",
 			testContainerName:      "dockette/debian:latest",
+			reusableContainerName:  "copa_debian_test_container",
 			args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
 			wantErr:                false,
 		},
@@ -47,6 +49,7 @@ func TestIntegrationDPKG(t *testing.T) {
 			expectedOutputFilePath: "testresources/dpkg/expectedoutput/ubuntu_expected_output.json",
 			actualOutputFilePath:   "ubuntu_actual_output.json",
 			testContainerName:      "rancher/healthcheck:v0.3.8",
+			reusableContainerName:  "copa_ubuntu_test_container",
 			args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
 			wantErr:                false,
 		},
@@ -55,7 +58,7 @@ func TestIntegrationDPKG(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// setup each test-containers, we are not re-using the container here because debian and ubuntu are two different images
-			container, err := setupTestContainer(ctx, tt.testContainerName)
+			container, err := setupTestContainer(ctx, tt.testContainerName, tt.reusableContainerName)
 			if err != nil {
 				t.Fatal(err)
 			}
