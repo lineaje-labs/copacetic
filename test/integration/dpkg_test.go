@@ -19,7 +19,7 @@ func TestIntegrationDPKG(t *testing.T) {
 	}
 
 	// Get version comparer for dpkg
-	debComparer := utils.VersionComparer{LessThan: utils.IsLessThanDebianVersion}
+	debComparer := utils.VersionComparer{IsValid: utils.IsValidDebianVersion, LessThan: utils.IsLessThanDebianVersion}
 
 	tests := []utils.Test{
 		{

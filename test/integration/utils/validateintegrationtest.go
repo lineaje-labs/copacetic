@@ -104,17 +104,29 @@ func ValidateIntegrationTest(t *testing.T, tt Test, ctx context.Context, wd stri
 		return expectedPatchOutputReport.PatchesApplied[i].InstalledPURL < expectedPatchOutputReport.PatchesApplied[j].InstalledPURL
 	})
 
+	if tt.WantErr && expectedPatchOutputReport.Message == "failure" {
+		// this is expected failure - in this case test should pass
+		return
+	}
+
+	if !tt.WantErr && expectedPatchOutputReport.Message == "failure" {
+		// this is unexpected failure - in this case test should fail
+		t.Errorf("Unexpected error: %s", expectedPatchOutputReport.Message)
+		return
+	}
+
+	// if patching is successful then make sure actual patch output matches with expected patch output
 	if !reflect.DeepEqual(actualPatchOutputReport.PatchesApplied, expectedPatchOutputReport.PatchesApplied) {
 		// There are two possibility to encounter this logic
 		// 1. Installed Package(s) is at higher version than the expected version - in this case test should pass
 		// 2. Installed package(s) is at below version or the installation met with unexpected error - in this case test should fail
 
-		// we assume case 1.
-		higherVersionPackageDownloaded := true
+		if len(expectedPatchOutputReport.PatchesApplied) != len(actualPatchOutputReport.PatchesApplied) {
+			t.Errorf("Mismatch in lengths of patches_applied:\nExpected: %+v\nActual:   %+v", expectedPatchOutputReport.PatchesApplied, actualPatchOutputReport.PatchesApplied)
+			return
+		}
 
-		minLen := min(len(expectedPatchOutputReport.PatchesApplied), len(actualPatchOutputReport.PatchesApplied))
-
-		for i := range minLen {
+		for i := range len(expectedPatchOutputReport.PatchesApplied) {
 			actualPackageUrl, err := purl.FromString(actualPatchOutputReport.PatchesApplied[i].FixedPURL)
 			if err != nil {
 				t.Errorf("Failed to get package url for purl %s due to - %v", actualPatchOutputReport.PatchesApplied[i].FixedPURL, err)
@@ -125,15 +137,19 @@ func ValidateIntegrationTest(t *testing.T, tt Test, ctx context.Context, wd stri
 				t.Errorf("Failed to get package url for purl %s due to - %v", expectedPatchOutputReport.PatchesApplied[i].FixedPURL, err)
 				return
 			}
-			if comparer.LessThan(actualPackageUrl.Version, expectedPackageUrl.Version) {
-				// we encountered case 2.
-				higherVersionPackageDownloaded = false
-				t.Errorf("Installed package %s version %s lower than required %s for update", actualPackageUrl.Name, actualPackageUrl.Version, expectedPackageUrl.Version)
-			}
-		}
 
-		if !higherVersionPackageDownloaded {
-			t.Errorf("Mismatch in patches_applied:\nExpected: %+v\nActual:   %+v", expectedPatchOutputReport.PatchesApplied, actualPatchOutputReport.PatchesApplied)
+			if !comparer.IsValid(expectedPackageUrl.Version) && !tt.WantErr {
+				t.Errorf("Invalid version %s found for package %s", expectedPackageUrl.Version, expectedPackageUrl.Name)
+				t.Errorf("Mismatch in patches_failed:\nExpected: %+v\nActual:   %+v", expectedPatchOutputReport.PatchesFailed, actualPatchOutputReport.PatchesFailed)
+				return
+			}
+
+			if comparer.LessThan(actualPackageUrl.Version, expectedPackageUrl.Version) && !tt.WantErr {
+				// we encountered case 2.
+				t.Errorf("Installed package %s version %s lower than required %s for update", actualPackageUrl.Name, actualPackageUrl.Version, expectedPackageUrl.Version)
+				t.Errorf("Mismatch in patches_failed:\nExpected: %+v\nActual:   %+v", expectedPatchOutputReport.PatchesFailed, actualPatchOutputReport.PatchesFailed)
+				return
+			}
 		}
 	}
 

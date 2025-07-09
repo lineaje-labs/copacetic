@@ -19,13 +19,23 @@ func TestIntegrationAPK(t *testing.T) {
 	}
 
 	// Get version comparer for apk
-	apkComparer := utils.VersionComparer{LessThan: utils.IsLessThanAPKVersion}
+	apkComparer := utils.VersionComparer{IsValid: utils.IsValidAPKVersion, LessThan: utils.IsLessThanAPKVersion}
 
 	tests := []utils.Test{
 		{
 			Name:                   "alpine 3.17.0_rc1 image should be patched successfully",
 			InputFilePath:          "testresources/apk/alpine/alpine_3_17_0_rc1_input.json",
 			ExpectedOutputFilePath: "testresources/apk/alpine/alpine_3_17_0_rc1_expected_output.json",
+			ActualOutputFilePath:   "alpine_3_17_0_rc1_actual_output.json",
+			TestContainerName:      "alpine:3.17.0_rc1",
+			ReusableContainerName:  "copa_alpine_test_container",
+			Args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
+			WantErr:                false,
+		},
+		{
+			Name:                   "alpine 3.17.0_rc1 image should be patched successfully for invalid package name",
+			InputFilePath:          "testresources/apk/alpine/alpine_3_17_0_rc1_invalid_package_input.json",
+			ExpectedOutputFilePath: "testresources/apk/alpine/alpine_3_17_0_rc1_invalid_package_input_expected_output.json",
 			ActualOutputFilePath:   "alpine_3_17_0_rc1_actual_output.json",
 			TestContainerName:      "alpine:3.17.0_rc1",
 			ReusableContainerName:  "copa_alpine_test_container",

@@ -1,6 +1,7 @@
 package utils
 
 type VersionComparer struct {
+	IsValid  func(string) bool
 	LessThan func(string, string) bool
 }
 
