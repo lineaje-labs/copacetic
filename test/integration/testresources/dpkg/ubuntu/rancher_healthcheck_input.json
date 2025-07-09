@@ -1,0 +1,163 @@
+{
+    "response_time": 0.00027179718017578125,
+    "answer": null,
+    "query_suggestions": null,
+    "view_details": {},
+    "meta_data": {
+        "total_components": 18,
+        "initial_irl": 5.5,
+        "direct_dependencies": {
+            "total": 1,
+            "oss": 1,
+            "private": 0,
+            "tp": 0,
+            "unknown": 0
+        },
+        "transitive_dependencies": {
+            "total": 17,
+            "oss": 6,
+            "private": 0,
+            "tp": 11,
+            "unknown": 0
+        },
+        "direct_vulnerabilities": {
+            "total": 0,
+            "oss": 0,
+            "private": 0,
+            "tp": 0,
+            "unknown": 0
+        },
+        "transitive_vulnerabilities": {
+            "total": 95,
+            "oss": 7,
+            "private": 0,
+            "tp": 88,
+            "unknown": 0
+        },
+        "total_vulnerability_count": 95,
+        "total_components_with_vulnerabilities": 11,
+        "vulnerable_components_with_fixes_in_basic_plan": 8,
+        "vulnerable_components_with_fixes_in_balanced_plan": 1,
+        "vulnerabilities_with_fixes_in_basic_plan": 31,
+        "vulnerabilities_with_fixes_in_balanced_plan": 1,
+        "basic_plan_component_vulnerability_fixes": [
+            {
+                "current_package_id": "647ca51b-f2e2-511f-ba99-b615f026c421",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2065548-2065549",
+                "target_hub_package_id": "",
+                "target_hub_sbom_id": "",
+                "current_component_purl": "pkg:deb/ubuntu/software-properties-common@0.96.20.7?arch=all&distro=ubuntu-16.04&upstream=software-properties",
+                "target_component_purl": "pkg:deb/ubuntu/software-properties-common@0.96.20.10",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "bf6c5094-c3d7-5277-92f0-4a06c719b78e",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2065548-2065549",
+                "target_hub_package_id": "",
+                "target_hub_sbom_id": "",
+                "current_component_purl": "pkg:deb/ubuntu/apt@1.2.27?arch=amd64&distro=ubuntu-16.04",
+                "target_component_purl": "pkg:deb/ubuntu/apt@1.2.32ubuntu0.2",
+                "fixed_vuln": 3
+            },
+            {
+                "current_package_id": "a331a6b9-379f-521d-b31d-d66821b49a3d",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2065548-2065549",
+                "target_hub_package_id": "",
+                "target_hub_sbom_id": "",
+                "current_component_purl": "pkg:deb/ubuntu/libapt-inst2.0@1.2.27?arch=amd64&distro=ubuntu-16.04&upstream=apt",
+                "target_component_purl": "pkg:deb/ubuntu/libapt-inst2.0@1.2.32ubuntu0.2",
+                "fixed_vuln": 3
+            },
+            {
+                "current_package_id": "0336180b-910c-5153-9788-1dbfea6e0b8d",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2065548-2065549",
+                "target_hub_package_id": "",
+                "target_hub_sbom_id": "",
+                "current_component_purl": "pkg:deb/ubuntu/python3-software-properties@0.96.20.7?arch=all&distro=ubuntu-16.04&upstream=software-properties",
+                "target_component_purl": "pkg:deb/ubuntu/python3-software-properties@0.96.20.10",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "2665eaf4-e01b-563b-9762-ef7e080c7222",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2065548-2065549",
+                "target_hub_package_id": "",
+                "target_hub_sbom_id": "",
+                "current_component_purl": "pkg:deb/ubuntu/libpython2.7-stdlib@2.7.12-1ubuntu0~16.04.1?arch=amd64&distro=ubuntu-16.04&upstream=python2.7",
+                "target_component_purl": "pkg:deb/ubuntu/libpython2.7-stdlib@2.7.12-1ubuntu0~16.04.8",
+                "fixed_vuln": 7
+            },
+            {
+                "current_package_id": "a94b8568-7c9a-50ad-a2cf-05aec0cc8df8",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2065548-2065549",
+                "target_hub_package_id": "",
+                "target_hub_sbom_id": "",
+                "current_component_purl": "pkg:deb/ubuntu/locales@2.23-0ubuntu5?arch=all&distro=ubuntu-16.04&upstream=glibc",
+                "target_component_purl": "pkg:deb/ubuntu/locales@2.23-0ubuntu10",
+                "fixed_vuln": 6
+            },
+            {
+                "current_package_id": "2ecf9ef2-4c9c-5a26-ab2f-e77d9134544f",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2065548-2065549",
+                "target_hub_package_id": "",
+                "target_hub_sbom_id": "",
+                "current_component_purl": "pkg:deb/ubuntu/curl@7.47.0-1ubuntu2.8?arch=amd64&distro=ubuntu-16.04",
+                "target_component_purl": "pkg:deb/ubuntu/curl@7.47.0-1ubuntu2.12",
+                "fixed_vuln": 3
+            },
+            {
+                "current_package_id": "88881803-d3f8-5a6a-99d9-46d256179ebf",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2065548-2065549",
+                "target_hub_package_id": "",
+                "target_hub_sbom_id": "",
+                "current_component_purl": "pkg:deb/ubuntu/python2.7@2.7.12-1ubuntu0~16.04.1?arch=amd64&distro=ubuntu-16.04",
+                "target_component_purl": "pkg:deb/ubuntu/python2.7@2.7.12-1ubuntu0~16.04.8",
+                "fixed_vuln": 7
+            }
+        ],
+        "balanced_plan_components_vulnerability_fixes": [
+            {
+                "current_package_id": "278af629-169c-5673-ba30-3f84d73642a3",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2065548-2065549",
+                "target_hub_package_id": "",
+                "target_hub_sbom_id": "",
+                "current_component_purl": "pkg:pypi/wheel@0.29.0",
+                "target_component_purl": "pkg:pypi/wheel@0.38.1",
+                "fixed_vuln": 1
+            }
+        ],
+        "comprehensive_plan_components": [
+            {
+                "current_package_id": "448bea41-9ae3-5a9a-8395-2973ebff940b",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2065548-2065549",
+                "target_hub_package_id": "",
+                "target_hub_sbom_id": "",
+                "current_component_purl": "pkg:pypi/pip@9.0.1",
+                "target_component_purl": "pkg:pypi/pip@23.3",
+                "fixed_vuln": 3
+            },
+            {
+                "current_package_id": "ec573eb8-f5b3-534e-9151-c64c10e841df",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2065548-2065549",
+                "target_hub_package_id": "",
+                "target_hub_sbom_id": "",
+                "current_component_purl": "pkg:pypi/setuptools@32.2.0",
+                "target_component_purl": "pkg:pypi/setuptools@78.1.1",
+                "fixed_vuln": 3
+            }
+        ],
+        "basic_plan_inherent_risk_level": 4.45,
+        "basic_plan_updated_vulnerability_count": 64,
+        "balanced_plan_inherent_risk_level": 0.0,
+        "balanced_plan_updated_vulnerability_count": 94,
+        "comprehensive_plan_inherent_risk_level": 0.0,
+        "comprehensive_plan_updated_vulnerability_count": 0
+    },
+    "task_ids": [],
+    "column": null,
+    "view_schema": null,
+    "Greeting": null,
+    "guid": null,
+    "message": "",
+    "workflow_id": null,
+    "error": false
+}
