@@ -25,7 +25,7 @@ func TestIntegrationAPK(t *testing.T) {
 	}
 	tests := []struct {
 		name                   string
-		fixplan                string
+		inputFilePath          string
 		expectedOutputFilePath string
 		actualOutputFilePath   string
 		testContainerName      string
@@ -34,10 +34,10 @@ func TestIntegrationAPK(t *testing.T) {
 		wantErr                bool
 	}{
 		{
-			name:                   "alpine report with available packages",
-			fixplan:                "testresources/apk/input/alpine_fixplan.json",
-			expectedOutputFilePath: "testresources/apk/expectedoutput/alpine_expected_output.json",
-			actualOutputFilePath:   "alpine_actual_output.json",
+			name:                   "alpine 3.17.0_rc1 image should be patched successfully",
+			inputFilePath:          "testresources/apk/alpine/alpine_3_17_0_rc1_input.json",
+			expectedOutputFilePath: "testresources/apk/alpine/alpine_3_17_0_rc1_expected_output.json",
+			actualOutputFilePath:   "alpine_3_17_0_rc1_actual_output.json",
 			testContainerName:      "alpine:3.17.0_rc1",
 			reusableContainerName:  "copa_alpine_test_container",
 			args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
@@ -47,7 +47,7 @@ func TestIntegrationAPK(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// setup each test-containers, we are not re-using the container here because debian and ubuntu are two different images
+			// Pull the container images to make patching easier to test
 			container, err := setupTestContainer(ctx, tt.testContainerName, tt.reusableContainerName)
 			if err != nil {
 				t.Fatal(err)
@@ -55,12 +55,12 @@ func TestIntegrationAPK(t *testing.T) {
 			// Clean up the container after the test is complete
 			defer container.Terminate(ctx)
 
-			fixplanFileFullPath := filepath.Join(wd, tt.fixplan)
+			inputFileFullPath := filepath.Join(wd, tt.inputFilePath)
 			expectedOutputFileFullPath := filepath.Join(wd, tt.expectedOutputFilePath)
 			actualOutputFileFullPath := filepath.Join(wd, tt.actualOutputFilePath)
 
-			// append report and output file path to command args
-			tt.args = append(tt.args, "-i", tt.testContainerName, "-r", fixplanFileFullPath, "-o", actualOutputFileFullPath)
+			// append the input report in lineaje format, and the output file path to command args
+			tt.args = append(tt.args, "-i", tt.testContainerName, "-r", inputFileFullPath, "-o", actualOutputFileFullPath)
 
 			// Create a new command with the test args
 			cmd := patch.NewPatchCmd()
@@ -113,33 +113,33 @@ func TestIntegrationAPK(t *testing.T) {
 				return
 			}
 
-			var actualCollectionSummary, expectedCollectionSummary lineaje.Output
-			err = json.Unmarshal(actualOutputJSONContent, &actualCollectionSummary)
+			var actualPatchOutputReport, expectedPatchOutputReport lineaje.Output
+			err = json.Unmarshal(actualOutputJSONContent, &actualPatchOutputReport)
 			if err != nil {
-				t.Errorf("Failed to get unmarshal the actual collection summary JSON due to - %v", err)
+				t.Errorf("Failed to unmarshal the actual patch output report JSON %s due to - %v", actualOutputFileFullPath, err)
 				return
 			}
 
-			err = json.Unmarshal(expectedOutputJSONContent, &expectedCollectionSummary)
+			err = json.Unmarshal(expectedOutputJSONContent, &expectedPatchOutputReport)
 			if err != nil {
-				t.Errorf("Failed to get unmarshal the expected collection summary JSON due to - %v", err)
+				t.Errorf("Failed to unmarshal the expected patch output report JSON %s due to - %v", expectedOutputFileFullPath, err)
 				return
 			}
 
-			sort.Slice(actualCollectionSummary.PatchesApplied, func(i, j int) bool {
-				return actualCollectionSummary.PatchesApplied[i].InstalledPURL < actualCollectionSummary.PatchesApplied[j].InstalledPURL
+			sort.Slice(actualPatchOutputReport.PatchesApplied, func(i, j int) bool {
+				return actualPatchOutputReport.PatchesApplied[i].InstalledPURL < actualPatchOutputReport.PatchesApplied[j].InstalledPURL
 			})
 
-			sort.Slice(expectedCollectionSummary.PatchesApplied, func(i, j int) bool {
-				return expectedCollectionSummary.PatchesApplied[i].InstalledPURL < expectedCollectionSummary.PatchesApplied[j].InstalledPURL
+			sort.Slice(expectedPatchOutputReport.PatchesApplied, func(i, j int) bool {
+				return expectedPatchOutputReport.PatchesApplied[i].InstalledPURL < expectedPatchOutputReport.PatchesApplied[j].InstalledPURL
 			})
 
-			if !reflect.DeepEqual(actualCollectionSummary.PatchesApplied, expectedCollectionSummary.PatchesApplied) {
-				t.Errorf("Mismatch in patches_applied:\nExpected: %+v\nActual:   %+v", expectedCollectionSummary.PatchesApplied, actualCollectionSummary.PatchesApplied)
+			if !reflect.DeepEqual(actualPatchOutputReport.PatchesApplied, expectedPatchOutputReport.PatchesApplied) {
+				t.Errorf("Mismatch in patches_applied:\nExpected: %+v\nActual:   %+v", expectedPatchOutputReport.PatchesApplied, actualPatchOutputReport.PatchesApplied)
 			}
 
-			if !reflect.DeepEqual(actualCollectionSummary.PatchesFailed, expectedCollectionSummary.PatchesFailed) {
-				t.Errorf("Mismatch in patches_failed:\nExpected: %+v\nActual:   %+v", expectedCollectionSummary.PatchesFailed, actualCollectionSummary.PatchesFailed)
+			if !reflect.DeepEqual(actualPatchOutputReport.PatchesFailed, expectedPatchOutputReport.PatchesFailed) {
+				t.Errorf("Mismatch in patches_failed:\nExpected: %+v\nActual:   %+v", expectedPatchOutputReport.PatchesFailed, actualPatchOutputReport.PatchesFailed)
 			}
 
 		})
