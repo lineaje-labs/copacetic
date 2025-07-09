@@ -2,9 +2,9 @@
 
 Readme for Copacetic integration tests
 
-The integration tests internally uses [testcontainers-go](https://github.com/testcontainers/testcontainers-go)
+The integration tests internally use [testcontainers-go](https://github.com/testcontainers/testcontainers-go)
 
-It requires the following,
+It requires the following.
 
 - Docker client to be installed locally
 - Connection to the Internet to download container image and packages
@@ -12,7 +12,7 @@ It requires the following,
 
 ## Steps
 
-- Run tests at root directory by calling the integration make target
+- Run tests from the root directory by calling the integration make target
 ```
 make integration
 ```
@@ -28,14 +28,14 @@ It was not selected as it did not support reuse of containers or parallel runs.
 #### Approach A
 
 1. Pull base images (Alpine, Debian, Ubuntu, RPM-based) using testcontainers-go.  
-2. Run the `copa` command by passing the image name and fixplan report as arguments – this generates the output JSON file.  
+2. Run the `copa` command by passing the image name and the input report (in Lineaje format) as arguments – this generates the output JSON file.  
 3. Compare the generated JSON output against the expected output for validation.
 
 #### Approach B
 
 1. Pull a Docker-in-Docker (DinD) image via testcontainers-go.  
 2. Install `copacetic` and `copa-lineaje-scanner` inside the DinD container.  
-3. Copy necessary fixplans into the DinD container.  
+3. Copy the necessary inputs into the DinD container.
 4. Pull base images inside the DinD environment.  
 5. Run the `copa` command within DinD with appropriate arguments.  
 6. Validate results internally within the DinD container.
