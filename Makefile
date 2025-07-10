@@ -121,7 +121,7 @@ test:
 .PHONY: integration
 integration: ## Run integration tests
 	$(info $(INFOMARK) Running integration tests on copacetic ...)
-	go test ./test/integration/... $(CODECOV_OPTS)
+	go test ./test/integration/ $(CODECOV_OPTS)
 
 ################################################################################
 # Target: clean                                                                #

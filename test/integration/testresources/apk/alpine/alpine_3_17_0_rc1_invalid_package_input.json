@@ -1,0 +1,171 @@
+{
+    "response_time": 0.0002460479736328125,
+    "answer": null,
+    "query_suggestions": null,
+    "view_details": {},
+    "meta_data": {
+        "total_components": 11,
+        "initial_irl": 5.5,
+        "direct_dependencies": {
+            "total": 1,
+            "oss": 1,
+            "private": 0,
+            "tp": 0,
+            "unknown": 0
+        },
+        "transitive_dependencies": {
+            "total": 10,
+            "oss": 2,
+            "private": 0,
+            "tp": 8,
+            "unknown": 0
+        },
+        "direct_vulnerabilities": {
+            "total": 0,
+            "oss": 0,
+            "private": 0,
+            "tp": 0,
+            "unknown": 0
+        },
+        "transitive_vulnerabilities": {
+            "total": 125,
+            "oss": 0,
+            "private": 0,
+            "tp": 125,
+            "unknown": 0
+        },
+        "total_vulnerability_count": 125,
+        "total_components_with_vulnerabilities": 7,
+        "vulnerable_components_with_fixes_in_basic_plan": 7,
+        "vulnerable_components_with_fixes_in_balanced_plan": 5,
+        "vulnerabilities_with_fixes_in_basic_plan": 70,
+        "vulnerabilities_with_fixes_in_balanced_plan": 75,
+        "basic_plan_component_vulnerability_fixes": [
+            {
+                "current_package_id": "de177365-5232-53bf-a47c-63305e45a13b",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2072602-2072603",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/musl-utils@1.2.3-r4?arch=x86_64&distro=alpine-3.17.0_rc1&upstream=musl",
+                "target_component_purl": "pkg:apk/alpine/musl-utils@1.2.3-r6",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "7fdee7f1-ac00-5363-acb7-7844350e3e05",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2072602-2072603",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/ssl_client@1.35.0-r27?arch=x86_64&distro=alpine-3.17.0_rc1&upstream=busybox",
+                "target_component_purl": "pkg:apk/alpine/ssl_client_invalid@1.100.1",
+                "fixed_vuln": 4
+            },
+            {
+                "current_package_id": "48d71c38-f96b-53f6-bb13-db02e3ee4d7d",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2072602-2072603",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/libcrypto3@3.0.7-r0?arch=x86_64&distro=alpine-3.17.0_rc1&upstream=openssl",
+                "target_component_purl": "pkg:apk/alpine/libcrypto3@3.0.15-r1",
+                "fixed_vuln": 28
+            },
+            {
+                "current_package_id": "7862dba9-d0f7-5209-9f6b-5adf27ac370e",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2072602-2072603",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/musl@1.2.3-r4?arch=x86_64&distro=alpine-3.17.0_rc1",
+                "target_component_purl": "pkg:apk/alpine/musl@1.2.3-r6",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "ccd58371-34c2-5d15-bf70-ad5855b13fed",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2072602-2072603",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/busybox-binsh@1.35.0-r27?arch=x86_64&distro=alpine-3.17.0_rc1&upstream=busybox",
+                "target_component_purl": "pkg:apk/alpine/busybox-binsh@1.35.0-r31",
+                "fixed_vuln": 4
+            },
+            {
+                "current_package_id": "3bfad247-685a-59ee-b606-0901769027b2",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2072602-2072603",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/libssl3@3.0.7-r0?arch=x86_64&distro=alpine-3.17.0_rc1&upstream=openssl",
+                "target_component_purl": "pkg:apk/alpine/libssl3@3.0.15-r1",
+                "fixed_vuln": 28
+            },
+            {
+                "current_package_id": "b822a212-b96e-51c1-825d-4c9b4317ab4b",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2072602-2072603",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/busybox@1.35.0-r27?arch=x86_64&distro=alpine-3.17.0_rc1",
+                "target_component_purl": "pkg:apk/alpine/busybox@1.35.0-r31",
+                "fixed_vuln": 4
+            }
+        ],
+        "balanced_plan_components_vulnerability_fixes": [
+            {
+                "current_package_id": "7fdee7f1-ac00-5363-acb7-7844350e3e05",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2072602-2072603",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/ssl_client@1.35.0-r27?arch=x86_64&distro=alpine-3.17.0_rc1&upstream=busybox",
+                "target_component_purl": "pkg:apk/alpine/ssl_client@1.36.1-r1",
+                "fixed_vuln": 5
+            },
+            {
+                "current_package_id": "48d71c38-f96b-53f6-bb13-db02e3ee4d7d",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2072602-2072603",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/libcrypto3@3.0.7-r0?arch=x86_64&distro=alpine-3.17.0_rc1&upstream=openssl",
+                "target_component_purl": "pkg:apk/alpine/libcrypto3@3.3.3-r0",
+                "fixed_vuln": 30
+            },
+            {
+                "current_package_id": "ccd58371-34c2-5d15-bf70-ad5855b13fed",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2072602-2072603",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/busybox-binsh@1.35.0-r27?arch=x86_64&distro=alpine-3.17.0_rc1&upstream=busybox",
+                "target_component_purl": "pkg:apk/alpine/busybox-binsh@1.36.1-r1",
+                "fixed_vuln": 5
+            },
+            {
+                "current_package_id": "3bfad247-685a-59ee-b606-0901769027b2",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2072602-2072603",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/libssl3@3.0.7-r0?arch=x86_64&distro=alpine-3.17.0_rc1&upstream=openssl",
+                "target_component_purl": "pkg:apk/alpine/libssl3@3.3.3-r0",
+                "fixed_vuln": 30
+            },
+            {
+                "current_package_id": "b822a212-b96e-51c1-825d-4c9b4317ab4b",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_xCYv4ljSU0XGgVVS-2072602-2072603",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/busybox@1.35.0-r27?arch=x86_64&distro=alpine-3.17.0_rc1",
+                "target_component_purl": "pkg:apk/alpine/busybox@1.36.1-r1",
+                "fixed_vuln": 5
+            }
+        ],
+        "comprehensive_plan_components": [],
+        "basic_plan_inherent_risk_level": 6.257142857142857,
+        "basic_plan_updated_vulnerability_count": 55,
+        "balanced_plan_inherent_risk_level": 2.34,
+        "balanced_plan_updated_vulnerability_count": 50,
+        "comprehensive_plan_inherent_risk_level": 0,
+        "comprehensive_plan_updated_vulnerability_count": 0
+    },
+    "task_ids": [],
+    "column": null,
+    "view_schema": null,
+    "Greeting": null,
+    "guid": null,
+    "message": "",
+    "workflow_id": null,
+    "error": false
+}
