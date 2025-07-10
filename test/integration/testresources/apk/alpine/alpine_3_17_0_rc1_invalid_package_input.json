@@ -56,7 +56,7 @@
                 "target_hub_package_id": null,
                 "target_hub_sbom_id": null,
                 "current_component_purl": "pkg:apk/alpine/ssl_client@1.35.0-r27?arch=x86_64&distro=alpine-3.17.0_rc1&upstream=busybox",
-                "target_component_purl": "pkg:apk/alpine/invalid_package",
+                "target_component_purl": "pkg:apk/alpine/ssl_client_invalid@1.100.1",
                 "fixed_vuln": 4
             },
             {

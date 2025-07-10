@@ -1,4 +1,4 @@
-package utils
+package integration_utils
 
 import debVer "github.com/knqyf263/go-deb-version"
 

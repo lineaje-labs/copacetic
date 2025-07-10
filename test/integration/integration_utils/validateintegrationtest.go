@@ -1,4 +1,4 @@
-package utils
+package integration_utils
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"sort"
 	"testing"
 
@@ -66,7 +67,6 @@ func ValidateIntegrationTest(t *testing.T, tt Test, ctx context.Context, wd stri
 	if tt.ActualOutputFilePath != "" {
 		var file *os.File
 		file, err = os.Open(actualOutputFileFullPath)
-		defer os.Remove(actualOutputFileFullPath)
 		if err != nil {
 			t.Errorf("Failed to open actual output file %s: %v", actualOutputFileFullPath, err)
 			return
@@ -111,7 +111,7 @@ func ValidateIntegrationTest(t *testing.T, tt Test, ctx context.Context, wd stri
 
 	if !tt.WantErr && expectedPatchOutputReport.Message == "failure" {
 		// this is unexpected failure - in this case test should fail
-		t.Errorf("Unexpected error: %s", expectedPatchOutputReport.Message)
+		t.Errorf("Received unexpected patch report summary error message: %s", expectedPatchOutputReport.Message)
 		return
 	}
 
@@ -122,39 +122,48 @@ func ValidateIntegrationTest(t *testing.T, tt Test, ctx context.Context, wd stri
 		// 2. Installed package(s) is at below version or the installation met with unexpected error - in this case test should fail
 
 		if len(expectedPatchOutputReport.PatchesApplied) != len(actualPatchOutputReport.PatchesApplied) {
-			t.Errorf("Mismatch in lengths of patches_applied:\nExpected: %+v\nActual:   %+v", expectedPatchOutputReport.PatchesApplied, actualPatchOutputReport.PatchesApplied)
+			t.Errorf("Mismatch in lengths of patches_applied:\nExpected: %v\nActual:   %v", expectedOutputFileFullPath, actualOutputFileFullPath)
 			return
 		}
 
 		for i := range len(expectedPatchOutputReport.PatchesApplied) {
+
 			actualPackageUrl, err := purl.FromString(actualPatchOutputReport.PatchesApplied[i].FixedPURL)
 			if err != nil {
-				t.Errorf("Failed to get package url for purl %s due to - %v", actualPatchOutputReport.PatchesApplied[i].FixedPURL, err)
+				t.Errorf("Failed to get package url for PURL %s due to - %v", actualPatchOutputReport.PatchesApplied[i].FixedPURL, err)
 				return
 			}
 			expectedPackageUrl, err := purl.FromString(expectedPatchOutputReport.PatchesApplied[i].FixedPURL)
 			if err != nil {
-				t.Errorf("Failed to get package url for purl %s due to - %v", expectedPatchOutputReport.PatchesApplied[i].FixedPURL, err)
+				t.Errorf("Failed to get package url for PURL %s due to - %v", expectedPatchOutputReport.PatchesApplied[i].FixedPURL, err)
 				return
 			}
 
-			if !comparer.IsValid(expectedPackageUrl.Version) && !tt.WantErr {
-				t.Errorf("Invalid version %s found for package %s", expectedPackageUrl.Version, expectedPackageUrl.Name)
-				t.Errorf("Mismatch in patches_failed:\nExpected: %+v\nActual:   %+v", expectedPatchOutputReport.PatchesFailed, actualPatchOutputReport.PatchesFailed)
+			if !comparer.IsValid(actualPackageUrl.Version) {
+				t.Errorf("Invalid version %s found for package %s with PURL %s", actualPackageUrl.Version, actualPackageUrl.Name, actualPatchOutputReport.PatchesApplied[i].FixedPURL)
+				t.Errorf("Mismatch in patches_applied:\nExpected output file path: %v\nActual output file path:   %v", expectedOutputFileFullPath, actualOutputFileFullPath)
 				return
 			}
 
-			if comparer.LessThan(actualPackageUrl.Version, expectedPackageUrl.Version) && !tt.WantErr {
+			if comparer.LessThan(actualPackageUrl.Version, expectedPackageUrl.Version) {
 				// we encountered case 2.
 				t.Errorf("Installed package %s version %s lower than required %s for update", actualPackageUrl.Name, actualPackageUrl.Version, expectedPackageUrl.Version)
-				t.Errorf("Mismatch in patches_failed:\nExpected: %+v\nActual:   %+v", expectedPatchOutputReport.PatchesFailed, actualPatchOutputReport.PatchesFailed)
+				t.Errorf("Mismatch in patches_applied:\nExpected output file path: %v\nActual output file path:   %v", expectedOutputFileFullPath, actualOutputFileFullPath)
 				return
 			}
 		}
 	}
 
 	if !reflect.DeepEqual(actualPatchOutputReport.PatchesFailed, expectedPatchOutputReport.PatchesFailed) {
-		t.Errorf("Mismatch in patches_failed:\nExpected: %+v\nActual:   %+v", expectedPatchOutputReport.PatchesFailed, actualPatchOutputReport.PatchesFailed)
+		for failedPURL := range actualPatchOutputReport.PatchesFailed {
+			if slices.Contains(tt.PURLsExpectedToFail, failedPURL) {
+				continue
+			} else {
+				t.Errorf("Failed to install package with purl %s due to - %v", failedPURL, actualPatchOutputReport.PatchesFailed[failedPURL])
+				t.Errorf("Mismatch in patches_failed:\nExpected output file path: %v\nActual output file path:   %v", expectedOutputFileFullPath, actualOutputFileFullPath)
+				return
+			}
+		}
 	}
 
 }

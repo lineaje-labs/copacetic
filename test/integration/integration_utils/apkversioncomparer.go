@@ -1,6 +1,8 @@
-package utils
+package integration_utils
 
-import apkVer "github.com/knqyf263/go-apk-version"
+import (
+	apkVer "github.com/knqyf263/go-apk-version"
+)
 
 // Depending on go-apk-version lib for APK version comparison rules.
 func IsValidAPKVersion(v string) bool {

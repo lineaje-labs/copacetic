@@ -1,4 +1,4 @@
-package utils
+package integration_utils
 
 import (
 	"context"

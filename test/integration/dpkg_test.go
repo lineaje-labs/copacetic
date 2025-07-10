@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/lineaje-labs/copacetic/test/integration/utils"
+	"github.com/lineaje-labs/copacetic/test/integration/integration_utils"
 )
 
 func TestIntegrationDPKG(t *testing.T) {
@@ -19,34 +19,36 @@ func TestIntegrationDPKG(t *testing.T) {
 	}
 
 	// Get version comparer for dpkg
-	debComparer := utils.VersionComparer{IsValid: utils.IsValidDebianVersion, LessThan: utils.IsLessThanDebianVersion}
+	debComparer := integration_utils.VersionComparer{IsValid: integration_utils.IsValidDebianVersion, LessThan: integration_utils.IsLessThanDebianVersion}
 
-	tests := []utils.Test{
+	tests := []integration_utils.Test{
 		{
 			Name:                   "dockette bullseye latest image should be patched successfully",
 			InputFilePath:          "testresources/dpkg/debian/dockette_bullseye_input.json",
 			ExpectedOutputFilePath: "testresources/dpkg/debian/dockette_bullseye_expected_output.json",
-			ActualOutputFilePath:   "dockette_bullseye_actual_output.json",
+			ActualOutputFilePath:   "testresources/dpkg/debian/dockette_bullseye_actual_output.json",
 			TestContainerName:      "dockette/debian:bullseye",
 			ReusableContainerName:  "copa_debian_test_container",
 			Args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
+			PURLsExpectedToFail:    []string{},
 			WantErr:                false,
 		},
 		{
 			Name:                   "rancher healthcheck v0.3.8 image should be patched successfully",
 			InputFilePath:          "testresources/dpkg/ubuntu/rancher_healthcheck_input.json",
 			ExpectedOutputFilePath: "testresources/dpkg/ubuntu/rancher_healthcheck_expected_output.json",
-			ActualOutputFilePath:   "rancher_healthcheck_actual_output.json",
+			ActualOutputFilePath:   "testresources/dpkg/ubuntu/rancher_healthcheck_actual_output.json",
 			TestContainerName:      "rancher/healthcheck:v0.3.8",
 			ReusableContainerName:  "copa_ubuntu_test_container",
 			Args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
+			PURLsExpectedToFail:    []string{},
 			WantErr:                false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
-			utils.ValidateIntegrationTest(t, tt, ctx, wd, debComparer)
+			integration_utils.ValidateIntegrationTest(t, tt, ctx, wd, debComparer)
 		})
 	}
 }
