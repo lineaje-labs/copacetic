@@ -496,21 +496,11 @@ func (rm *rpmManager) installUpdates(ctx context.Context, updates unversioned.Up
 									else
   										echo "$PKG-$VER not found — searching for the next higher available version..."
 
-										# Set architecture filter depending on tool
-  										case "$TOOL" in
-    										*dnf*|*microdnf*)
-												ARCH_FLAG="--arch=$ARCH"
-												;;
-    										*)
-												ARCH_FLAG="--archlist=$ARCH"
-												;;
-  										esac
-
-										# List all available versions filtered by arch
+										# List all available versions
   										# Query available versions, requesting version-release fields
-  										if "$TOOL" repoquery --available $ARCH_FLAG --showduplicates "$PKG" >/dev/null 2>&1; then
+  										if "$TOOL" repoquery --available --showduplicates "$PKG" >/dev/null 2>&1; then
     										versions=$(
-      											"$TOOL" repoquery --available $ARCH_FLAG --showduplicates \
+      											"$TOOL" repoquery --available --showduplicates \
        												--queryformat '%%{version}-%%{release}' "$PKG" \
         											| sort -V | uniq
     										)
