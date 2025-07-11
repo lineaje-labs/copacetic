@@ -2,16 +2,10 @@ package integration
 
 import (
 	"context"
-	"encoding/json"
-	"io"
 	"os"
-	"path/filepath"
-	"reflect"
-	"sort"
 	"testing"
 
-	"github.com/project-copacetic/copacetic/pkg/output/lineaje"
-	"github.com/project-copacetic/copacetic/pkg/patch"
+	"github.com/lineaje-labs/copacetic/test/integration/integration_utils"
 )
 
 func TestIntegrationAPK(t *testing.T) {
@@ -23,125 +17,38 @@ func TestIntegrationAPK(t *testing.T) {
 		t.Errorf("Failed to get path of current working directory: %v", err)
 		return
 	}
-	tests := []struct {
-		name                   string
-		fixplan                string
-		expectedOutputFilePath string
-		actualOutputFilePath   string
-		testContainerName      string
-		reusableContainerName  string
-		args                   []string
-		wantErr                bool
-	}{
+
+	// Get version comparer for apk
+	apkComparer := integration_utils.VersionComparer{IsValid: integration_utils.IsValidAPKVersion, LessThan: integration_utils.IsLessThanAPKVersion}
+
+	tests := []integration_utils.Test{
 		{
-			name:                   "alpine report with available packages",
-			fixplan:                "testresources/apk/input/alpine_fixplan.json",
-			expectedOutputFilePath: "testresources/apk/expectedoutput/alpine_expected_output.json",
-			actualOutputFilePath:   "alpine_actual_output.json",
-			testContainerName:      "alpine:3.17.0_rc1",
-			reusableContainerName:  "copa_alpine_test_container",
-			args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
-			wantErr:                false,
+			Name:                   "alpine 3.17.0_rc1 image should be patched successfully",
+			InputFilePath:          "testresources/apk/alpine/alpine_3_17_0_rc1_input.json",
+			ExpectedOutputFilePath: "testresources/apk/alpine/alpine_3_17_0_rc1_expected_output.json",
+			ActualOutputFilePath:   "testresources/apk/alpine/alpine_3_17_0_rc1_actual_output.json",
+			TestContainerName:      "alpine:3.17.0_rc1",
+			ReusableContainerName:  "copa_alpine_test_container",
+			Args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
+			PURLsExpectedToFail:    []string{},
+			WantErr:                false,
+		},
+		{
+			Name:                   "alpine 3.17.0_rc1 image should be patched successfully for invalid package name", // ssl_client_invalid@1.100.1
+			InputFilePath:          "testresources/apk/alpine/alpine_3_17_0_rc1_invalid_package_input.json",
+			ExpectedOutputFilePath: "testresources/apk/alpine/alpine_3_17_0_rc1_invalid_package_input_expected_output.json",
+			ActualOutputFilePath:   "testresources/apk/alpine/alpine_3_17_0_rc1_invalid_package_input_actual_output.json",
+			TestContainerName:      "alpine:3.17.0_rc1",
+			ReusableContainerName:  "copa_alpine_test_container",
+			Args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
+			PURLsExpectedToFail:    []string{},
+			WantErr:                false,
 		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// setup each test-containers, we are not re-using the container here because debian and ubuntu are two different images
-			container, err := setupTestContainer(ctx, tt.testContainerName, tt.reusableContainerName)
-			if err != nil {
-				t.Fatal(err)
-			}
-			// Clean up the container after the test is complete
-			defer container.Terminate(ctx)
-
-			fixplanFileFullPath := filepath.Join(wd, tt.fixplan)
-			expectedOutputFileFullPath := filepath.Join(wd, tt.expectedOutputFilePath)
-			actualOutputFileFullPath := filepath.Join(wd, tt.actualOutputFilePath)
-
-			// append report and output file path to command args
-			tt.args = append(tt.args, "-i", tt.testContainerName, "-r", fixplanFileFullPath, "-o", actualOutputFileFullPath)
-
-			// Create a new command with the test args
-			cmd := patch.NewPatchCmd()
-			cmd.SetArgs(tt.args)
-
-			// Run the command and capture the output
-			err = cmd.Execute()
-			if err != nil {
-				t.Errorf("Error: %v", err)
-			}
-
-			var actualOutputJSONContent, expectedOutputJSONContent []byte
-			if tt.expectedOutputFilePath != "" {
-				var file *os.File
-
-				file, err = os.Open(expectedOutputFileFullPath)
-				if err != nil {
-					t.Errorf("Failed to open expected output file %s: %v", expectedOutputFileFullPath, err)
-					return
-				}
-				defer file.Close()
-
-				expectedOutputJSONContent, err = io.ReadAll(file)
-				if err != nil {
-					t.Errorf("Failed to read expected output JSON content: %v", err)
-					return
-				}
-			} else {
-				t.Errorf("Expected output file not specified")
-				return
-			}
-
-			if tt.actualOutputFilePath != "" {
-				var file *os.File
-				file, err = os.Open(actualOutputFileFullPath)
-				defer os.Remove(actualOutputFileFullPath)
-				if err != nil {
-					t.Errorf("Failed to open actual output file %s: %v", actualOutputFileFullPath, err)
-					return
-				}
-				defer file.Close()
-
-				actualOutputJSONContent, err = io.ReadAll(file)
-				if err != nil {
-					t.Errorf("Failed to read actual output JSON content: %v", err)
-					return
-				}
-			} else {
-				t.Errorf("Actual output file not specified")
-				return
-			}
-
-			var actualCollectionSummary, expectedCollectionSummary lineaje.Output
-			err = json.Unmarshal(actualOutputJSONContent, &actualCollectionSummary)
-			if err != nil {
-				t.Errorf("Failed to get unmarshal the actual collection summary JSON due to - %v", err)
-				return
-			}
-
-			err = json.Unmarshal(expectedOutputJSONContent, &expectedCollectionSummary)
-			if err != nil {
-				t.Errorf("Failed to get unmarshal the expected collection summary JSON due to - %v", err)
-				return
-			}
-
-			sort.Slice(actualCollectionSummary.PatchesApplied, func(i, j int) bool {
-				return actualCollectionSummary.PatchesApplied[i].InstalledPURL < actualCollectionSummary.PatchesApplied[j].InstalledPURL
-			})
-
-			sort.Slice(expectedCollectionSummary.PatchesApplied, func(i, j int) bool {
-				return expectedCollectionSummary.PatchesApplied[i].InstalledPURL < expectedCollectionSummary.PatchesApplied[j].InstalledPURL
-			})
-
-			if !reflect.DeepEqual(actualCollectionSummary.PatchesApplied, expectedCollectionSummary.PatchesApplied) {
-				t.Errorf("Mismatch in patches_applied:\nExpected: %+v\nActual:   %+v", expectedCollectionSummary.PatchesApplied, actualCollectionSummary.PatchesApplied)
-			}
-
-			if !reflect.DeepEqual(actualCollectionSummary.PatchesFailed, expectedCollectionSummary.PatchesFailed) {
-				t.Errorf("Mismatch in patches_failed:\nExpected: %+v\nActual:   %+v", expectedCollectionSummary.PatchesFailed, actualCollectionSummary.PatchesFailed)
-			}
-
+		t.Run(tt.Name, func(t *testing.T) {
+			integration_utils.ValidateIntegrationTest(t, tt, ctx, wd, apkComparer)
 		})
 	}
 }
