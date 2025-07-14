@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"context"
 	_ "embed"
 	"encoding/json"
 	"fmt"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/distribution/reference"
 	"github.com/opencontainers/go-digest"
+	"github.com/project-copacetic/copacetic/pkg/types/unversioned"
 	"github.com/project-copacetic/copacetic/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -37,7 +39,58 @@ type testImage struct {
 	IgnoreErrors bool          `json:"ignoreErrors"`
 }
 
+// LINEAJE: ParsedImage holds the platform, repository, and image name parsed from a container image reference.
+type ParsedImage struct {
+	Platform        string
+	ImageRepository string
+	ImageName       string
+}
+
+// LINEAJE: getPlatformAndRepoAndName parses image into platform, repo, and name
+func getPlatformAndRepoAndName(image string) ParsedImage {
+	var platform string
+
+	switch {
+	case strings.HasPrefix(image, "docker.io/"):
+		platform = "docker-hub"
+	case strings.HasPrefix(image, "gcr.io/"), strings.Contains(image, "pkg.dev"):
+		platform = "gcr"
+	case strings.HasPrefix(image, "ghcr.io/"):
+		platform = "ghcr"
+	case strings.HasPrefix(image, "quay.io/"):
+		platform = "quay"
+	case strings.HasPrefix(image, "mcr.microsoft.com/"):
+		platform = "mcr"
+	case strings.HasPrefix(image, "registry.k8s.io/"):
+		platform = "k8s"
+	case strings.HasPrefix(image, "public.ecr.aws/"):
+		platform = "ecr-public"
+	case strings.Contains(image, ".dkr.ecr.") && strings.Contains(image, ".amazonaws.com"):
+		platform = "ecr"
+	case strings.Contains(image, ".azurecr.io"):
+		platform = "acr"
+	default:
+		platform = "unknown"
+	}
+
+	lastSlash := strings.LastIndex(image, "/")
+	imageRepo := ""
+	imageName := image
+
+	if lastSlash > 0 {
+		imageRepo = image[:lastSlash]
+		imageName = image[lastSlash+1:]
+	}
+
+	return ParsedImage{
+		Platform:        platform,
+		ImageRepository: imageRepo,
+		ImageName:       imageName,
+	}
+}
+
 func TestPatch(t *testing.T) {
+	ctx := context.Background()
 	var images []testImage
 	err := json.Unmarshal(testImages, &images)
 	require.NoError(t, err)
@@ -49,7 +102,16 @@ func TestPatch(t *testing.T) {
 
 	for _, img := range images {
 		imageRef := fmt.Sprintf("%s:%s@%s", img.Image, img.Tag, img.Digest)
-		mediaType, err := utils.GetMediaType(imageRef)
+		parsedImage := getPlatformAndRepoAndName(img.Image)
+		imageDetail := unversioned.ImageDetail{
+			Platform:        parsedImage.Platform,
+			ImageRepository: parsedImage.ImageRepository,
+			ImageName:       parsedImage.ImageName,
+			ImageVersion:    img.Tag,
+			ImageDigest:     string(img.Digest),
+			Private:         false,
+		}
+		mediaType, err := utils.GetMediaType(ctx, imageRef, imageDetail)
 		require.NoError(t, err)
 
 		// Oracle tends to throw false positives with Trivy
@@ -99,7 +161,7 @@ func TestPatch(t *testing.T) {
 			tagPatched := img.Tag + "-patched"
 			patchedRef := fmt.Sprintf("%s:%s", r.Name(), tagPatched)
 
-			patchedMediaType, err := utils.GetMediaType(imageRef)
+			patchedMediaType, err := utils.GetMediaType(ctx, imageRef, imageDetail)
 			require.NoError(t, err)
 			fmt.Println("patchedMediaType: ", patchedMediaType)
 

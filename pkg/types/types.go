@@ -22,6 +22,7 @@ type UpdateManifest struct {
 	Arch          string         `json:"arch"`
 	Updates       UpdatePackages `json:"updates"`
 	PluginVersion string         `json:"pluginVersion"` // LINEAJE: Optional field that holds the details of the Plugin that generated the report
+	ImageDetails  ImageDetail    `json:"image_details"` // LINEAJE: Optional field that holds the details of the image that needs to be patched
 }
 
 // PatchPlatform is an extension of ispec.Platform but with a reportFile.
@@ -57,4 +58,14 @@ type PatchDetail struct {
 	InstalledPURL string `json:"input_purl"`
 	FixedPURL     string `json:"fixed_purl"`
 	ErrorMsg      string `json:"-"`
+}
+
+// LINEAJE: Field that holds the details of the image that needs to be patched
+type ImageDetail struct {
+	Platform        string `json:"platform"`
+	ImageRepository string `json:"image_repository"`
+	ImageName       string `json:"image_name"`
+	ImageVersion    string `json:"image_version"`
+	ImageDigest     string `json:"image_digest"`
+	Private         bool   `json:"private"`
 }

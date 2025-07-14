@@ -249,5 +249,13 @@
     "guid": null,
     "message": "",
     "workflow_id": null,
-    "error": false
+    "error": false,
+        "image_details": {
+        "platform": "docker-hub",
+        "image_repository": "docker.io/teddysun",
+        "image_name": "rpmbuild",
+        "image_version": "9",
+        "image_digest": "sha256:da75162f8cc1785f764bad560f94265efd78a1eeb55139b37d578e3acc659f62",
+        "private": false
+    }
 }

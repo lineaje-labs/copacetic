@@ -1,0 +1,306 @@
+{
+    "response_time": 0.0002608299255371094,
+    "answer": null,
+    "query_suggestions": null,
+    "view_details": {},
+    "meta_data": {
+        "total_components": 31,
+        "initial_irl": 5.5,
+        "direct_dependencies": {
+            "total": 1,
+            "oss": 0,
+            "private": 0,
+            "tp": 0,
+            "unknown": 1
+        },
+        "transitive_dependencies": {
+            "total": 30,
+            "oss": 4,
+            "private": 0,
+            "tp": 26,
+            "unknown": 0
+        },
+        "direct_vulnerabilities": {
+            "total": 0,
+            "oss": 0,
+            "private": 0,
+            "tp": 0,
+            "unknown": 0
+        },
+        "transitive_vulnerabilities": {
+            "total": 142,
+            "oss": 0,
+            "private": 0,
+            "tp": 142,
+            "unknown": 0
+        },
+        "total_vulnerability_count": 142,
+        "total_components_with_vulnerabilities": 23,
+        "vulnerable_components_with_fixes_in_basic_plan": 20,
+        "vulnerable_components_with_fixes_in_balanced_plan": 4,
+        "vulnerabilities_with_fixes_in_basic_plan": 86,
+        "vulnerabilities_with_fixes_in_balanced_plan": 53,
+        "basic_plan_component_vulnerability_fixes": [
+            {
+                "current_package_id": "d55a3edc-9acf-5259-9503-ea35dd239f30",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/openssh@9.0_p1-r2?arch=x86_64&distro=alpine-3.16.2",
+                "target_component_purl": "pkg:apk/alpine/openssh@9.0_p1-r5",
+                "fixed_vuln": 5
+            },
+            {
+                "current_package_id": "628c02e8-6822-5516-9b18-4a5ef4a6ef14",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/openssh-keygen@9.0_p1-r2?arch=x86_64&distro=alpine-3.16.2&upstream=openssh",
+                "target_component_purl": "pkg:apk/alpine/openssh-keygen@9.0_p1-r5",
+                "fixed_vuln": 5
+            },
+            {
+                "current_package_id": "a8ee78e2-5bb5-57c3-b4e1-80210ff661bc",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/busybox@1.35.0-r17?arch=x86_64&distro=alpine-3.16.2",
+                "target_component_purl": "pkg:apk/alpine/busybox@1.35.0-r18",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "babfc2fe-a822-5e09-a130-8805c46b6d22",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:golang/stdlib@1.18.6",
+                "target_component_purl": "pkg:golang/stdlib@1.18.9",
+                "fixed_vuln": 4
+            },
+            {
+                "current_package_id": "610918f3-8b30-5df9-affc-b3b39d5084c5",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/musl-utils@1.2.3-r0?arch=x86_64&distro=alpine-3.16.2&upstream=musl",
+                "target_component_purl": "pkg:apk/alpine/musl-utils@1.2.3-r4",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "95258f2d-91b2-5b66-ae6a-a23b6f1b57a3",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/musl@1.2.3-r0?arch=x86_64&distro=alpine-3.16.2",
+                "target_component_purl": "pkg:apk/alpine/musl@1.2.3-r4",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "b33c1528-c684-513a-955e-b5e9377b37f4",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/nghttp2-libs@1.47.0-r0?arch=x86_64&distro=alpine-3.16.2&upstream=nghttp2",
+                "target_component_purl": "pkg:apk/alpine/nghttp2-libs@1.47.0-r2",
+                "fixed_vuln": 2
+            },
+            {
+                "current_package_id": "8638dd32-8aeb-56f2-a466-ed4ddc870dd4",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/ncurses-libs@6.3_p20220521-r0?arch=x86_64&distro=alpine-3.16.2&upstream=ncurses",
+                "target_component_purl": "pkg:apk/alpine/ncurses-libs@6.3_p20220521-r1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "cd3ddcf2-d534-5e53-8a05-e1a81e91917b",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/ssl_client@1.35.0-r17?arch=x86_64&distro=alpine-3.16.2&upstream=busybox",
+                "target_component_purl": "pkg:apk/alpine/ssl_client@1.35.0-r18",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "0cd9b6ee-85a8-5e66-9bcd-f0bdda7edb10",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/openssh-client-common@9.0_p1-r2?arch=x86_64&distro=alpine-3.16.2&upstream=openssh",
+                "target_component_purl": "pkg:apk/alpine/openssh-client-common@9.0_p1-r5",
+                "fixed_vuln": 5
+            },
+            {
+                "current_package_id": "5ca1c695-ec00-558f-a28c-7ce9397b9615",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/git@2.36.2-r0?arch=x86_64&distro=alpine-3.16.2",
+                "target_component_purl": "pkg:apk/alpine/git@2.36.6-r0",
+                "fixed_vuln": 9
+            },
+            {
+                "current_package_id": "4537c53e-2ed5-582d-aac6-fe4fea3cee58",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/openssh-server-common@9.0_p1-r2?arch=x86_64&distro=alpine-3.16.2&upstream=openssh",
+                "target_component_purl": "pkg:apk/alpine/openssh-server-common@9.0_p1-r5",
+                "fixed_vuln": 5
+            },
+            {
+                "current_package_id": "8422880d-1455-5969-a19b-1de3a38e5dbf",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/openssh-sftp-server@9.0_p1-r2?arch=x86_64&distro=alpine-3.16.2&upstream=openssh",
+                "target_component_purl": "pkg:apk/alpine/openssh-sftp-server@9.0_p1-r5",
+                "fixed_vuln": 5
+            },
+            {
+                "current_package_id": "6f1ff615-8a1a-5613-84a4-4b664cfd865e",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/libcap@2.64-r0?arch=x86_64&distro=alpine-3.16.2",
+                "target_component_purl": "pkg:apk/alpine/libcap@2.64-r1",
+                "fixed_vuln": 2
+            },
+            {
+                "current_package_id": "025b250b-77e1-5faa-aa8e-e55560ab8dc0",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/ncurses-terminfo-base@6.3_p20220521-r0?arch=x86_64&distro=alpine-3.16.2&upstream=ncurses",
+                "target_component_purl": "pkg:apk/alpine/ncurses-terminfo-base@6.3_p20220521-r1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "e5aaf9d5-18a7-545a-aeda-3c3d95c80af3",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/libcrypto1.1@1.1.1q-r0?arch=x86_64&distro=alpine-3.16.2&upstream=openssl",
+                "target_component_purl": "pkg:apk/alpine/libcrypto1.1@1.1.1w-r1",
+                "fixed_vuln": 10
+            },
+            {
+                "current_package_id": "827bc7b5-7d35-5240-82cb-d480725736a6",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/libcurl@7.83.1-r3?arch=x86_64&distro=alpine-3.16.2&upstream=curl",
+                "target_component_purl": "pkg:apk/alpine/libcurl@7.83.1-r6",
+                "fixed_vuln": 8
+            },
+            {
+                "current_package_id": "6c3f0871-e049-5920-a898-2071200831ec",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/openssh-server@9.0_p1-r2?arch=x86_64&distro=alpine-3.16.2&upstream=openssh",
+                "target_component_purl": "pkg:apk/alpine/openssh-server@9.0_p1-r5",
+                "fixed_vuln": 5
+            },
+            {
+                "current_package_id": "abe2b432-171c-597d-a150-88a7071efac9",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/openssh-client-default@9.0_p1-r2?arch=x86_64&distro=alpine-3.16.2&upstream=openssh",
+                "target_component_purl": "pkg:apk/alpine/openssh-client-default@9.0_p1-r5",
+                "fixed_vuln": 5
+            },
+            {
+                "current_package_id": "9633ba2a-33af-5284-9039-72b37429f38e",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/libssl1.1@1.1.1q-r0?arch=x86_64&distro=alpine-3.16.2&upstream=openssl",
+                "target_component_purl": "pkg:apk/alpine/libssl1.1@1.1.1w-r1",
+                "fixed_vuln": 10
+            }
+        ],
+        "balanced_plan_components_vulnerability_fixes": [
+            {
+                "current_package_id": "08ac904f-75bc-52dc-81a7-be92255d05a2",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/sqlite-libs@3.38.5-r0?arch=x86_64&distro=alpine-3.16.2&upstream=sqlite",
+                "target_component_purl": "pkg:apk/alpine/sqlite-libs@3.40.1-r1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "babfc2fe-a822-5e09-a130-8805c46b6d22",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:golang/stdlib@1.18.6",
+                "target_component_purl": "pkg:golang/stdlib@1.23.10",
+                "fixed_vuln": 47
+            },
+            {
+                "current_package_id": "f7a1171b-7782-5c82-960b-79f39420f5a4",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/pcre2@10.40-r0?arch=x86_64&distro=alpine-3.16.2",
+                "target_component_purl": "pkg:apk/alpine/pcre2@10.42-r0",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "4521e662-7307-5e9c-ad8e-e48a66f0c9d8",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/expat@2.4.9-r0?arch=x86_64&distro=alpine-3.16.2",
+                "target_component_purl": "pkg:apk/alpine/expat@2.6.4-r0",
+                "fixed_vuln": 4
+            }
+        ],
+        "comprehensive_plan_components": [
+            {
+                "current_package_id": "d55a3edc-9acf-5259-9503-ea35dd239f30",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/openssh@9.0_p1-r2?arch=x86_64&distro=alpine-3.16.2",
+                "target_component_purl": "pkg:apk/alpine/openssh@2022.82-r2",
+                "fixed_vuln": 5
+            },
+            {
+                "current_package_id": "827bc7b5-7d35-5240-82cb-d480725736a6",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-1263579-1263580",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/libcurl@7.83.1-r3?arch=x86_64&distro=alpine-3.16.2&upstream=curl",
+                "target_component_purl": "pkg:apk/alpine/libcurl@8.5.0-r0",
+                "fixed_vuln": 23
+            }
+        ],
+        "basic_plan_inherent_risk_level": 3.845,
+        "basic_plan_updated_vulnerability_count": 56,
+        "balanced_plan_inherent_risk_level": 2.225,
+        "balanced_plan_updated_vulnerability_count": 89,
+        "comprehensive_plan_inherent_risk_level": 5.0,
+        "comprehensive_plan_updated_vulnerability_count": 0
+    },
+    "task_ids": [],
+    "column": null,
+    "view_schema": null,
+    "Greeting": null,
+    "guid": null,
+    "message": "",
+    "workflow_id": null,
+    "error": false,
+    "image_details": {
+        "platform": "docker-hub",
+        "image_repository": "docker.io/infrauser",
+        "image_name": "lineaje-demo",
+        "image_version": "1.0.2",
+        "image_digest": "sha256:b71803b92e1e83a368998841dab3ad230603d19d08b0de209dda0b1db2b33907",
+        "private": true
+    }
+}

@@ -32,12 +32,13 @@ func TestIntegrationRPM(t *testing.T) {
 			Args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
 			PURLsExpectedToFail:    []string{},
 			WantErr:                false,
+			VersionComparer:        rpmComparer,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
-			integration_utils.ValidateIntegrationTest(t, tt, ctx, wd, rpmComparer)
+			integration_utils.ValidateIntegrationTest(t, tt, ctx, wd)
 		})
 	}
 }

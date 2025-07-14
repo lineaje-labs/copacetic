@@ -15,4 +15,5 @@ type Test struct {
 	Args                   []string
 	PURLsExpectedToFail    []string
 	WantErr                bool
+	VersionComparer        VersionComparer
 }

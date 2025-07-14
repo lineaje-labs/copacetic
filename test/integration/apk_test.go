@@ -32,6 +32,7 @@ func TestIntegrationAPK(t *testing.T) {
 			Args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
 			PURLsExpectedToFail:    []string{},
 			WantErr:                false,
+			VersionComparer:        apkComparer,
 		},
 		{
 			Name:                   "alpine 3.17.0_rc1 image should be patched successfully for invalid package name", // ssl_client_invalid@1.100.1
@@ -43,12 +44,13 @@ func TestIntegrationAPK(t *testing.T) {
 			Args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
 			PURLsExpectedToFail:    []string{},
 			WantErr:                false,
+			VersionComparer:        apkComparer,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
-			integration_utils.ValidateIntegrationTest(t, tt, ctx, wd, apkComparer)
+			integration_utils.ValidateIntegrationTest(t, tt, ctx, wd)
 		})
 	}
 }

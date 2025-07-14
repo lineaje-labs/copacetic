@@ -16,7 +16,7 @@ import (
 	"github.com/project-copacetic/copacetic/pkg/patch"
 )
 
-func ValidateIntegrationTest(t *testing.T, tt Test, ctx context.Context, wd string, comparer VersionComparer) {
+func ValidateIntegrationTest(t *testing.T, tt Test, ctx context.Context, wd string) {
 
 	// Pull the container images to make patching easier to test
 	container, err := setupTestContainer(ctx, tt.TestContainerName, tt.ReusableContainerName)
@@ -139,13 +139,13 @@ func ValidateIntegrationTest(t *testing.T, tt Test, ctx context.Context, wd stri
 				return
 			}
 
-			if !comparer.IsValid(actualPackageUrl.Version) {
+			if !tt.VersionComparer.IsValid(actualPackageUrl.Version) {
 				t.Errorf("Invalid version %s found for package %s with PURL %s", actualPackageUrl.Version, actualPackageUrl.Name, actualPatchOutputReport.PatchesApplied[i].FixedPURL)
 				t.Errorf("Mismatch in patches_applied:\nExpected output file path: %v\nActual output file path:   %v", expectedOutputFileFullPath, actualOutputFileFullPath)
 				return
 			}
 
-			if comparer.LessThan(actualPackageUrl.Version, expectedPackageUrl.Version) {
+			if tt.VersionComparer.LessThan(actualPackageUrl.Version, expectedPackageUrl.Version) {
 				// we encountered case 2.
 				t.Errorf("Installed package %s version %s lower than required %s for update", actualPackageUrl.Name, actualPackageUrl.Version, expectedPackageUrl.Version)
 				t.Errorf("Mismatch in patches_applied:\nExpected output file path: %v\nActual output file path:   %v", expectedOutputFileFullPath, actualOutputFileFullPath)

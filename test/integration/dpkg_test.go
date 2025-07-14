@@ -32,6 +32,7 @@ func TestIntegrationDPKG(t *testing.T) {
 			Args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
 			PURLsExpectedToFail:    []string{},
 			WantErr:                false,
+			VersionComparer:        debComparer,
 		},
 		{
 			Name:                   "rancher healthcheck v0.3.8 image should be patched successfully",
@@ -43,12 +44,13 @@ func TestIntegrationDPKG(t *testing.T) {
 			Args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
 			PURLsExpectedToFail:    []string{},
 			WantErr:                false,
+			VersionComparer:        debComparer,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
-			integration_utils.ValidateIntegrationTest(t, tt, ctx, wd, debComparer)
+			integration_utils.ValidateIntegrationTest(t, tt, ctx, wd)
 		})
 	}
 }

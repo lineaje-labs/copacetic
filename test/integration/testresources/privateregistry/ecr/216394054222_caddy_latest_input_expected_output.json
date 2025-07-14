@@ -1,0 +1,41 @@
+{
+  "schema_no": "1.0",
+  "status": "success",
+  "message": "",
+  "image_details": {
+    "platform": "local",
+    "patched_image": "216394054222.dkr.ecr.ca-central-1.amazonaws.com/caddy:latest-patched",
+    "patched_image_digest": "sha256:d55c27c17423043bfdf063497de696df1bde7e25457f5170beadf92365210593"
+  },
+  "patches_applied": [
+    {
+      "input_purl": "pkg:apk/alpine/apk-tools@2.10.5-r1?arch=x86_64\u0026distro=alpine-3.12.3",
+      "fixed_purl": "pkg:apk/alpine/apk-tools@2.10.8-r1"
+    },
+    {
+      "input_purl": "pkg:apk/alpine/busybox@1.31.1-r19?arch=x86_64\u0026distro=alpine-3.12.3",
+      "fixed_purl": "pkg:apk/alpine/busybox@1.31.1-r22"
+    },
+    {
+      "input_purl": "pkg:apk/alpine/libcrypto1.1@1.1.1i-r0?arch=x86_64\u0026distro=alpine-3.12.3\u0026upstream=openssl",
+      "fixed_purl": "pkg:apk/alpine/libcrypto1.1@1.1.1o-r0"
+    },
+    {
+      "input_purl": "pkg:apk/alpine/libssl1.1@1.1.1i-r0?arch=x86_64\u0026distro=alpine-3.12.3\u0026upstream=openssl",
+      "fixed_purl": "pkg:apk/alpine/libssl1.1@1.1.1o-r0"
+    },
+    {
+      "input_purl": "pkg:apk/alpine/ssl_client@1.31.1-r19?arch=x86_64\u0026distro=alpine-3.12.3\u0026upstream=busybox",
+      "fixed_purl": "pkg:apk/alpine/ssl_client@1.31.1-r22"
+    },
+    {
+      "input_purl": "pkg:apk/alpine/zlib@1.2.11-r3?arch=x86_64\u0026distro=alpine-3.12.3",
+      "fixed_purl": "pkg:apk/alpine/zlib@1.2.12-r3"
+    }
+  ],
+  "patches_failed": {},
+  "copacetic_version": "copacetic ",
+  "start_time": "2025-07-14T07:08:39Z",
+  "end_time": "2025-07-14T07:08:47Z",
+  "scanner_version": "copa-lineaje-scanner version 0.1.0-2025"
+}
