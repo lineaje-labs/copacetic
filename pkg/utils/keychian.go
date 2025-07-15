@@ -2,6 +2,7 @@ package utils
 
 import (
 	"io"
+	"os"
 	"strings"
 
 	ecr "github.com/awslabs/amazon-ecr-credential-helper/ecr-login"
@@ -22,6 +23,9 @@ func getKeychainForRegistry(imageRef string, imageDetail unversioned.ImageDetail
 		if imageDetail.Private {
 			privateImagePuller.ImagePull = ecrImagePull
 		}
+		// LINEAJE: Disable auth cache by setting AWS_ECR_DISABLE_CACHE to "true".
+		// This ensures that ECR credentials are freshly retrieved for every request and never cached locally.
+		os.Setenv("AWS_ECR_DISABLE_CACHE", "true")
 		return amazonKeychain, privateImagePuller
 	default:
 		// LINEAJE: In the case of a Docker Hub public repository, Copacetic automatically pulls the image.
