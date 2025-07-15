@@ -29,6 +29,7 @@ func TestIntegrationRPM(t *testing.T) {
 			ActualOutputFilePath:   "testresources/rpm/dnf/teddysun_rpmbuild_actual_output.json",
 			TestContainerName:      "teddysun/rpmbuild:9",
 			ReusableContainerName:  "copa_rpm_dnf_test_container",
+			SetupTestContainer:     true,
 			Args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
 			PURLsExpectedToFail:    []string{},
 			WantErr:                false,

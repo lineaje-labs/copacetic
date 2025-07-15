@@ -20,19 +20,22 @@ func TestIntegrationPublicRepository(t *testing.T) {
 
 	// Get version comparer for apk
 	apkComparer := integration_utils.VersionComparer{IsValid: integration_utils.IsValidAPKVersion, LessThan: integration_utils.IsLessThanAPKVersion}
+	// Get version comparer for dpkg
+	debComparer := integration_utils.VersionComparer{IsValid: integration_utils.IsValidDebianVersion, LessThan: integration_utils.IsLessThanDebianVersion}
 
 	tests := []integration_utils.Test{
 		{
-			Name:                   "alpine 3.18.0 image in public ECR registry in AWS should be patched successfully",
-			InputFilePath:          "testresources/publicregistry/ecr/public_ecr_alpine_3_18_0_input.json",
-			ExpectedOutputFilePath: "testresources/publicregistry/ecr/public_ecr_alpine_3_18_0_input_expected_output.json",
-			ActualOutputFilePath:   "testresources/publicregistry/ecr/public_ecr_alpine_3_18_0_input_actual_output.json",
-			TestContainerName:      "public.ecr.aws/docker/library/alpine:3.18.0",
-			ReusableContainerName:  "copa_public_ecr_alpine_test_container",
+			Name:                   "nginx 1.24.4-amd64 image in public ECR registry in AWS should be patched successfully",
+			InputFilePath:          "testresources/publicregistry/ecr/public_ecr_nginx_1_21_4_amd64_input.json",
+			ExpectedOutputFilePath: "testresources/publicregistry/ecr/public_ecr_nginx_1_21_4_amd64_input_expected_output.json",
+			ActualOutputFilePath:   "testresources/publicregistry/ecr/public_ecr_nginx_1_21_4_amd64_input_actual_output.json",
+			TestContainerName:      "public.ecr.aws/nginx/nginx:1.21.4-amd64",
+			ReusableContainerName:  "copa_public_ecr_nginx_test_container",
+			SetupTestContainer:     true,
 			Args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
 			PURLsExpectedToFail:    []string{},
 			WantErr:                false,
-			VersionComparer:        apkComparer,
+			VersionComparer:        debComparer,
 		},
 		{
 			Name:                   "alpine 3.18.0 image in public Docker Hub registry should be patched successfully",
@@ -40,6 +43,7 @@ func TestIntegrationPublicRepository(t *testing.T) {
 			ExpectedOutputFilePath: "testresources/publicregistry/dockerhub/public_docker_io_library_alpine_3_18_0_input_expected_output.json",
 			ActualOutputFilePath:   "testresources/publicregistry/dockerhub/public_docker_io_library_alpine_3_18_0_input_actual_output.json",
 			TestContainerName:      "docker.io/library/alpine:3.18.0",
+			SetupTestContainer:     true,
 			ReusableContainerName:  "copa_public_dockerhub_alpine_test_container",
 			Args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
 			PURLsExpectedToFail:    []string{},

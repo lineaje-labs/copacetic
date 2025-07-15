@@ -31,10 +31,11 @@ func TestIntegrationPrivateRepository(t *testing.T) {
 	tests := []integration_utils.Test{
 		{
 			Name:                   "caddy latest image in private ECR registry in AWS account 216394054222 should be patched successfully",
-			InputFilePath:          "testresources/privateregistry/ecr/216394054222_caddy_lates_input.json",
-			ExpectedOutputFilePath: "testresources/privateregistry/ecr/216394054222_caddy_lates_input_expected_output.json",
-			ActualOutputFilePath:   "testresources/privateregistry/ecr/216394054222_caddy_lates_input_actual_output.json",
+			InputFilePath:          "testresources/privateregistry/ecr/216394054222_caddy_latest_input.json",
+			ExpectedOutputFilePath: "testresources/privateregistry/ecr/216394054222_caddy_latest_input_expected_output.json",
+			ActualOutputFilePath:   "testresources/privateregistry/ecr/216394054222_caddy_latest_input_actual_output.json",
 			TestContainerName:      "216394054222.dkr.ecr.ca-central-1.amazonaws.com/caddy:latest", // Private ECR repository. AWS_REGION, AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY should be set as environment variables.
+			SetupTestContainer:     false,
 			ReusableContainerName:  "copa_private_ecr_caddy_test_container",
 			Args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
 			PURLsExpectedToFail:    []string{},
@@ -47,6 +48,7 @@ func TestIntegrationPrivateRepository(t *testing.T) {
 			ExpectedOutputFilePath: "testresources/privateregistry/dockerhub/infrauser_lineaje_demo_1_0_2_input_expected_output.json",
 			ActualOutputFilePath:   "testresources/privateregistry/dockerhub/infrauser_lineaje_demo_1_0_2_input_actual_output.json",
 			TestContainerName:      "infrauser/lineaje-demo:1.0.2", // Private Docker Hub repository. DOCKER_USERNAME and DOCKER_ACCESS_TOKEN should be set as environment variables.
+			SetupTestContainer:     false,
 			ReusableContainerName:  "copa_private_docker_lineaje_demo_test_container",
 			Args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
 			PURLsExpectedToFail:    []string{},
@@ -60,4 +62,11 @@ func TestIntegrationPrivateRepository(t *testing.T) {
 			integration_utils.ValidateIntegrationTest(t, tt, ctx, wd)
 		})
 	}
+
+	//Unset the environment variables
+	os.Unsetenv("AWS_REGION")
+	os.Unsetenv("AWS_ACCESS_KEY_ID")
+	os.Unsetenv("AWS_SECRET_ACCESS_KEY")
+	os.Unsetenv("DOCKER_USERNAME")
+	os.Unsetenv("DOCKER_ACCESS_TOKEN")
 }

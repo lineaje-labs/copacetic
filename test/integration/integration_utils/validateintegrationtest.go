@@ -18,13 +18,15 @@ import (
 
 func ValidateIntegrationTest(t *testing.T, tt Test, ctx context.Context, wd string) {
 
-	// Pull the container images to make patching easier to test
-	container, err := setupTestContainer(ctx, tt.TestContainerName, tt.ReusableContainerName)
-	if err != nil {
-		t.Fatal(err)
+	// If Setup test container is set then pull the container images to make patching easier to test
+	if tt.SetupTestContainer {
+		container, err := setupTestContainer(ctx, tt.TestContainerName, tt.ReusableContainerName)
+		if err != nil {
+			t.Fatal(err)
+		}
+		// Clean up the container after the test is complete
+		defer container.Terminate(ctx)
 	}
-	// Clean up the container after the test is complete
-	defer container.Terminate(ctx)
 
 	inputFileFullPath := filepath.Join(wd, tt.InputFilePath)
 	expectedOutputFileFullPath := filepath.Join(wd, tt.ExpectedOutputFilePath)
@@ -38,7 +40,7 @@ func ValidateIntegrationTest(t *testing.T, tt Test, ctx context.Context, wd stri
 	cmd.SetArgs(tt.Args)
 
 	// Run the command and capture the output
-	err = cmd.Execute()
+	err := cmd.Execute()
 	if err != nil {
 		t.Errorf("Error: %v", err)
 	}

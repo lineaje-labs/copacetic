@@ -12,6 +12,7 @@ type Test struct {
 	ActualOutputFilePath   string
 	TestContainerName      string
 	ReusableContainerName  string
+	SetupTestContainer     bool
 	Args                   []string
 	PURLsExpectedToFail    []string
 	WantErr                bool
