@@ -731,7 +731,17 @@ func getOSVersion(ctx context.Context, osreleaseBytes []byte) (string, error) {
 		return "", fmt.Errorf("unable to parse os-release data %w", err)
 	}
 
-	return osData["VERSION_ID"], nil
+	if len(osData["VERSION_ID"]) > 0 {
+		return osData["VERSION_ID"], nil
+	} else {
+		log.Debugf("VERSION_CODENAME in os data is - %s", osData["VERSION_CODENAME"])
+		switch osData["VERSION_CODENAME"] {
+		case "trixie":
+			return "13", nil
+		default:
+			return osData["VERSION_CODENAME"], nil
+		}
+	}
 }
 
 func newDockerClient() (dockerClient.APIClient, error) {

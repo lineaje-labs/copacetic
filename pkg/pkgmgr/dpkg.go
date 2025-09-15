@@ -96,7 +96,7 @@ func getAPTImageName(manifest *unversioned.UpdateManifest, osVersion string, use
 		} else {
 			version = strings.Split(version, ".")[0] + "-slim"
 		}
-	} else {
+	} else if len(manifest.Metadata.OS.Type) > 0 {
 		osType = manifest.Metadata.OS.Type
 	}
 
