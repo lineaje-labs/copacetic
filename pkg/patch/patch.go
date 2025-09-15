@@ -734,7 +734,7 @@ func getOSVersion(ctx context.Context, osreleaseBytes []byte) (string, error) {
 	if len(osData["VERSION_ID"]) > 0 {
 		return osData["VERSION_ID"], nil
 	} else {
-		log.Debug("VERSION_CODENAME in os data is - %s", osData["VERSION_CODENAME"])
+		log.Debugf("VERSION_CODENAME in os data is - %s", osData["VERSION_CODENAME"])
 		switch osData["VERSION_CODENAME"] {
 		case "trixie":
 			return "13", nil
