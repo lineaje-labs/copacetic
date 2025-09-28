@@ -29,15 +29,17 @@ func TestIntegrationRPM(t *testing.T) {
 			ActualOutputFilePath:   "testresources/rpm/dnf/teddysun_rpmbuild_actual_output.json",
 			TestContainerName:      "teddysun/rpmbuild:9",
 			ReusableContainerName:  "copa_rpm_dnf_test_container",
+			SetupTestContainer:     false,
 			Args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
 			PURLsExpectedToFail:    []string{},
 			WantErr:                false,
+			VersionComparer:        rpmComparer,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
-			integration_utils.ValidateIntegrationTest(t, tt, ctx, wd, rpmComparer)
+			integration_utils.ValidateIntegrationTest(t, tt, ctx, wd)
 		})
 	}
 }

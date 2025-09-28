@@ -311,9 +311,11 @@ func patchSingleArchImage(
 	}
 
 	var updates *unversioned.UpdateManifest
+	imageDetails := unversioned.ImageDetail{}
 	// Parse report for update packages
 	if reportFile != "" {
 		updates, err = report.TryParseScanReport(reportFile, scanner)
+		imageDetails = updates.ImageDetails
 		if err != nil {
 			return nil, err
 		}
@@ -336,7 +338,7 @@ func patchSingleArchImage(
 	}
 
 	// get the original media type of the image to determine if we should export as OCI or Docker
-	mt, err := utils.GetMediaType(ref)
+	mt, err := utils.GetMediaType(ctx, ref, imageDetails)
 	shouldExportOCI := err == nil && strings.Contains(mt, "vnd.oci.image")
 
 	switch {

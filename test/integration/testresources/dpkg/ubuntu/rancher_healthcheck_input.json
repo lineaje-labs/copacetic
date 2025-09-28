@@ -159,5 +159,14 @@
     "guid": null,
     "message": "",
     "workflow_id": null,
-    "error": false
+    "error": false,
+    "image_details": {
+        "platform": "docker-hub",
+        "image_repository": "docker.io/rancher",
+        "image_name": "healthcheck",
+        "image_version": "v0.3.8",
+        "image_digest": "sha256:6627073b8f556f4b3e65d46844800bc9f81b47e6ab94894704536d51a7aee360",
+        "private": false
+    }
 }
+

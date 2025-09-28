@@ -29,9 +29,11 @@ func TestIntegrationDPKG(t *testing.T) {
 			ActualOutputFilePath:   "testresources/dpkg/debian/dockette_bullseye_actual_output.json",
 			TestContainerName:      "dockette/debian:bullseye",
 			ReusableContainerName:  "copa_debian_test_container",
+			SetupTestContainer:     true,
 			Args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
 			PURLsExpectedToFail:    []string{},
 			WantErr:                false,
+			VersionComparer:        debComparer,
 		},
 		{
 			Name:                   "rancher healthcheck v0.3.8 image should be patched successfully",
@@ -40,15 +42,17 @@ func TestIntegrationDPKG(t *testing.T) {
 			ActualOutputFilePath:   "testresources/dpkg/ubuntu/rancher_healthcheck_actual_output.json",
 			TestContainerName:      "rancher/healthcheck:v0.3.8",
 			ReusableContainerName:  "copa_ubuntu_test_container",
+			SetupTestContainer:     true,
 			Args:                   []string{"patch", "--scanner", "lineaje-scanner", "-f", "lineaje"},
 			PURLsExpectedToFail:    []string{},
 			WantErr:                false,
+			VersionComparer:        debComparer,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
-			integration_utils.ValidateIntegrationTest(t, tt, ctx, wd, debComparer)
+			integration_utils.ValidateIntegrationTest(t, tt, ctx, wd)
 		})
 	}
 }

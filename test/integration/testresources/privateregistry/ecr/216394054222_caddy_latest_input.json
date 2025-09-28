@@ -1,0 +1,179 @@
+{
+    "response_time": 0.00021004676818847656,
+    "answer": null,
+    "query_suggestions": null,
+    "view_details": {},
+    "meta_data": {
+        "total_components": 18,
+        "initial_irl": 5.5,
+        "direct_dependencies": {
+            "total": 1,
+            "oss": 0,
+            "private": 0,
+            "tp": 0,
+            "unknown": 1
+        },
+        "transitive_dependencies": {
+            "total": 17,
+            "oss": 9,
+            "private": 0,
+            "tp": 8,
+            "unknown": 0
+        },
+        "direct_vulnerabilities": {
+            "total": 0,
+            "oss": 0,
+            "private": 0,
+            "tp": 0,
+            "unknown": 0
+        },
+        "transitive_vulnerabilities": {
+            "total": 147,
+            "oss": 6,
+            "private": 0,
+            "tp": 141,
+            "unknown": 0
+        },
+        "total_vulnerability_count": 147,
+        "total_components_with_vulnerabilities": 11,
+        "vulnerable_components_with_fixes_in_basic_plan": 8,
+        "vulnerable_components_with_fixes_in_balanced_plan": 4,
+        "vulnerabilities_with_fixes_in_basic_plan": 58,
+        "vulnerabilities_with_fixes_in_balanced_plan": 93,
+        "basic_plan_component_vulnerability_fixes": [
+            {
+                "current_package_id": "89697e0a-ffd1-5ba1-be78-6190ddecfe1a",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_1EK4erLpnD6cqxIO-11814134-11814135",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:golang/stdlib@1.15.2",
+                "target_component_purl": "pkg:golang/stdlib@1.15.15",
+                "fixed_vuln": 12
+            },
+            {
+                "current_package_id": "0f51a6c4-7939-51c1-9e31-40025921b854",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_1EK4erLpnD6cqxIO-11814134-11814135",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/libssl1.1@1.1.1i-r0?arch=x86_64&distro=alpine-3.12.3&upstream=openssl",
+                "target_component_purl": "pkg:apk/alpine/libssl1.1@1.1.1n-r0",
+                "fixed_vuln": 8
+            },
+            {
+                "current_package_id": "87a99566-8a58-509f-8daa-25778b32f236",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_1EK4erLpnD6cqxIO-11814134-11814135",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:golang/github.com/masterminds/goutils@v1.1.0",
+                "target_component_purl": "pkg:golang/github.com/masterminds/goutils@1.1.1",
+                "fixed_vuln": 2
+            },
+            {
+                "current_package_id": "4bbb8f6e-5b0b-5d7d-a187-d25124cf6e59",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_1EK4erLpnD6cqxIO-11814134-11814135",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/ssl_client@1.31.1-r19?arch=x86_64&distro=alpine-3.12.3&upstream=busybox",
+                "target_component_purl": "pkg:apk/alpine/ssl_client@1.31.1-r22",
+                "fixed_vuln": 12
+            },
+            {
+                "current_package_id": "b831eeaf-552c-51c5-9e07-c327df522619",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_1EK4erLpnD6cqxIO-11814134-11814135",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/zlib@1.2.11-r3?arch=x86_64&distro=alpine-3.12.3",
+                "target_component_purl": "pkg:apk/alpine/zlib@1.2.12-r2",
+                "fixed_vuln": 2
+            },
+            {
+                "current_package_id": "237ad786-cc2d-5234-b1fb-b51f23ee3d54",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_1EK4erLpnD6cqxIO-11814134-11814135",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/busybox@1.31.1-r19?arch=x86_64&distro=alpine-3.12.3",
+                "target_component_purl": "pkg:apk/alpine/busybox@1.31.1-r22",
+                "fixed_vuln": 12
+            },
+            {
+                "current_package_id": "206667a8-71d6-5f4b-bf71-5f26138b9de4",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_1EK4erLpnD6cqxIO-11814134-11814135",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/apk-tools@2.10.5-r1?arch=x86_64&distro=alpine-3.12.3",
+                "target_component_purl": "pkg:apk/alpine/apk-tools@2.10.7-r0",
+                "fixed_vuln": 2
+            },
+            {
+                "current_package_id": "1fa1abb5-7a7f-59d6-88ef-32fc7e8c15e1",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_1EK4erLpnD6cqxIO-11814134-11814135",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:apk/alpine/libcrypto1.1@1.1.1i-r0?arch=x86_64&distro=alpine-3.12.3&upstream=openssl",
+                "target_component_purl": "pkg:apk/alpine/libcrypto1.1@1.1.1n-r0",
+                "fixed_vuln": 8
+            }
+        ],
+        "balanced_plan_components_vulnerability_fixes": [
+            {
+                "current_package_id": "177dc583-d62a-5539-97f4-fbb577161d5e",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_1EK4erLpnD6cqxIO-11814134-11814135",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:golang/google.golang.org/protobuf@v1.24.0",
+                "target_component_purl": "pkg:golang/google.golang.org/protobuf@1.33.0",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "89697e0a-ffd1-5ba1-be78-6190ddecfe1a",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_1EK4erLpnD6cqxIO-11814134-11814135",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:golang/stdlib@1.15.2",
+                "target_component_purl": "pkg:golang/stdlib@1.23.10",
+                "fixed_vuln": 89
+            },
+            {
+                "current_package_id": "545e40cc-63b9-536a-b1c7-b1fb4c14cdcb",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_1EK4erLpnD6cqxIO-11814134-11814135",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:golang/github.com/prometheus/client_golang@v1.7.1",
+                "target_component_purl": "pkg:golang/github.com/prometheus/client_golang@1.11.1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "4b702704-c926-53d0-899c-0506e90060e4",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_1EK4erLpnD6cqxIO-11814134-11814135",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:golang/google.golang.org/grpc@v1.27.1",
+                "target_component_purl": "pkg:golang/google.golang.org/grpc@1.56.3",
+                "fixed_vuln": 2
+            }
+        ],
+        "comprehensive_plan_components": [],
+        "basic_plan_inherent_risk_level": 6.25,
+        "basic_plan_updated_vulnerability_count": 89,
+        "balanced_plan_inherent_risk_level": 0.0,
+        "balanced_plan_updated_vulnerability_count": 54,
+        "comprehensive_plan_inherent_risk_level": 0.0,
+        "comprehensive_plan_updated_vulnerability_count": 0
+    },
+    "task_ids": [],
+    "column": null,
+    "view_schema": null,
+    "Greeting": null,
+    "guid": null,
+    "message": "",
+    "workflow_id": null,
+    "error": false,
+    "image_details": {
+        "platform": "ecr",
+        "image_repository": "216394054222.dkr.ecr.ca-central-1.amazonaws.com",
+        "image_name": "caddy",
+        "image_version": "latest",
+        "image_digest": "sha256:6c52994f26f7f3fd5db685627f6dae43b2bec3769718ded39da8a8399081dc1a",
+        "private": true
+    }
+}

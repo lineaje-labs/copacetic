@@ -167,5 +167,14 @@
     "guid": null,
     "message": "",
     "workflow_id": null,
-    "error": false
+    "error": false,
+    "image_details": {
+        "platform": "docker-hub",
+        "image_repository": "docker.io",
+        "image_name": "alpine",
+        "image_version": "3.17.0.rc_1",
+        "image_digest": "sha256:9dd89930b3a7cc289bb4c70b85b7a910acb21240f52c405e586ca54db078a0c5",
+        "private": false
+    }
 }
+

@@ -196,15 +196,11 @@ func (am *apkManager) upgradePackages(ctx context.Context, updates unversioned.U
 		var parts []string
 		const checkAlpineVersionTemplate = `
 										arch="$(apk --print-arch)"
-										alpine_version=$(cat /etc/alpine-release)
+										full_version=$(cat /etc/alpine-release)
 
-										# Check if the version contains a release candidate suffix
-										if echo "$alpine_version" | grep -q '_rc'; then
-											# Extract the base version number (e.g., 3.17 from 3.17.0_rc1)
-											alpine_version=$(echo "$alpine_version" | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/')
-										fi
+										# Extract only MAJOR.MINOR, ignore patch and RC suffix
+										alpine_version=$(echo "$full_version" | sed -E 's/^([0-9]+\.[0-9]+).*/\1/')
 
-										# Now, alpine_version contains the stable version number (e.g., 3.17)
 										echo "Using Alpine version: $alpine_version on $arch"
 									`
 		const apkInstallTemplate = `
@@ -214,21 +210,43 @@ func (am *apkManager) upgradePackages(ctx context.Context, updates unversioned.U
 										if apk add --no-cache "$pkg"="$req_ver"; then
   											echo "Version $req_ver for $pkg installed."
 										else
-											echo "Version $req_ver for $pkg not found — searching for alternatives..."
+											branch="v$alpine_version"
+											repo="http://dl-cdn.alpinelinux.org/alpine/$branch/main"
+  											if wget --spider -q "$repo"; then
+    											echo "Adding $branch repo and retrying..."
+    											echo "$repo" >> /etc/apk/repositories
+    											apk update
 
-											# Scrape all versions from Alpine package site, then sort/unique them:
-											versions=$(wget -qO- "https://pkgs.alpinelinux.org/packages?name=$pkg&branch=v$alpine_version&arch=$arch" \
-												| grep -oE "[0-9]+\.[0-9]+(\.[0-9]+)?-r[0-9]+" \
-												| sort -V | uniq)
+    											if apk add --no-cache "$pkg=$req_ver"; then
+      												echo "Version $req_ver for $pkg installed."
+    											else
+      												echo "Version $req_ver for $pkg not found — searching for alternatives..."
 
-											echo "Available versions for $pkg: $versions"
+      												versions=$(
+														apk info -d "$pkg" \
+														| grep "^$pkg-" \
+														| sed -E "s/^$pkg-([^ ]+).*/\1/" \
+														| sort -V \
+														| uniq
+													)
 
-											# Pick the next greater version or fallback to the latest:
-											next_ver=$(printf "%%s\n" "$versions" | awk -v cur="$req_ver" '$0 > cur { print; exit }')
-											[ -z "$next_ver" ] && next_ver=$(printf "%%s\n" "$versions" | tail -n1)
+													echo "Available versions for $pkg: $versions"
 
-											echo "Selecting next version for $pkg: $next_ver"
-											apk add --no-cache "$pkg"="$next_ver"
+													# Pick the next greater version or fallback to the latest:
+													next_ver=$(printf "%%s\n" "$versions" | awk -v cur="$req_ver" '$0 > cur { print; exit }')
+													[ -z "$next_ver" ] && next_ver=$(printf "%%s\n" "$versions" | tail -n1)
+
+													if [ -z "$next_ver" ]; then
+        												echo "No newer version found; installing the latest available version."
+        												apk add --no-cache "$pkg"
+      												else
+        												echo "Selecting next version for $pkg: $next_ver"
+        												apk add --no-cache "$pkg=$next_ver"
+      												fi
+    											fi
+  											else
+    											echo "Branch repo $repo not reachable. Skipping $pkg."
+  											fi
 										fi
 									`
 

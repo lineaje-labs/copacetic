@@ -121,5 +121,14 @@
     "guid": null,
     "message": "",
     "workflow_id": null,
-    "error": false
+    "error": false,
+    "image_details": {
+        "platform": "docker-hub",
+        "image_repository": "docker.io/dockette",
+        "image_name": "debian",
+        "image_version": "bullseye",
+        "image_digest": "sha256:501b37def8d4a2df4bfb1ae58bcd3bae6bcbe7588463adeefea67c956210ef42",
+        "private": false
+    }
 }
+

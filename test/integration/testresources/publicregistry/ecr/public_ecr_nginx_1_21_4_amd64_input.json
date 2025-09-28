@@ -1,0 +1,828 @@
+{
+    "response_time": 0.00038504600524902344,
+    "answer": null,
+    "query_suggestions": null,
+    "view_details": {},
+    "meta_data": {
+        "total_components": 51,
+        "initial_irl": 5.5,
+        "direct_dependencies": {
+            "total": 1,
+            "oss": 1,
+            "private": 0,
+            "tp": 0,
+            "unknown": 0
+        },
+        "transitive_dependencies": {
+            "total": 50,
+            "oss": 18,
+            "private": 0,
+            "tp": 28,
+            "unknown": 4
+        },
+        "direct_vulnerabilities": {
+            "total": 0,
+            "oss": 0,
+            "private": 0,
+            "tp": 0,
+            "unknown": 0
+        },
+        "transitive_vulnerabilities": {
+            "total": 199,
+            "oss": 10,
+            "private": 0,
+            "tp": 176,
+            "unknown": 13
+        },
+        "total_vulnerability_count": 199,
+        "total_components_with_vulnerabilities": 28,
+        "vulnerable_components_with_fixes_in_basic_plan": 28,
+        "vulnerable_components_with_fixes_in_balanced_plan": 28,
+        "vulnerabilities_with_fixes_in_basic_plan": 117,
+        "vulnerabilities_with_fixes_in_balanced_plan": 165,
+        "basic_plan_component_vulnerability_fixes": [
+            {
+                "current_package_id": "8cf34c01-2e2c-5e85-bf3c-9a6ba98a67fb",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/e2fsprogs@1.46.2-2?arch=amd64&distro=debian-11",
+                "target_component_purl": "pkg:deb/debian/e2fsprogs@1.46.2-2+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "044ec605-fe3a-5369-bb16-3b403e49f66d",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libsystemd0@247.3-6?arch=amd64&distro=debian-11&upstream=systemd",
+                "target_component_purl": "pkg:deb/debian/libsystemd0@247.3-7+deb11u6",
+                "fixed_vuln": 6
+            },
+            {
+                "current_package_id": "248c164d-e4c4-5faf-bed4-d56313377ed2",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/dpkg@1.20.9?arch=amd64&distro=debian-11",
+                "target_component_purl": "pkg:deb/debian/dpkg@1.20.10",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "8794cad8-cdff-5669-bd5a-fa5c48eddb06",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libxpm4@1:3.5.12-1?arch=amd64&distro=debian-11&upstream=libxpm",
+                "target_component_purl": "pkg:deb/debian/libxpm4@1:3.5.12-1.1~deb11u1",
+                "fixed_vuln": 3
+            },
+            {
+                "current_package_id": "e205e0cf-48ab-566c-ba2b-faf73e6f3766",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/bsdutils@1:2.36.1-8?arch=amd64&distro=debian-11&upstream=util-linux%402.36.1-8",
+                "target_component_purl": "pkg:deb/debian/bsdutils@2.36.1-8+deb11u2",
+                "fixed_vuln": 3
+            },
+            {
+                "current_package_id": "ee654ad0-ebd1-5328-a2fe-69e549b52c37",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libexpat1@2.2.10-2?arch=amd64&distro=debian-11&upstream=expat",
+                "target_component_purl": "pkg:deb/debian/libexpat1@2.2.10-2+deb11u6",
+                "fixed_vuln": 21
+            },
+            {
+                "current_package_id": "46a9eebe-6377-54c3-80d7-3e8a0e3bdeb1",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/zlib1g@1:1.2.11.dfsg-2?arch=amd64&distro=debian-11&upstream=zlib",
+                "target_component_purl": "pkg:deb/debian/zlib1g@1:1.2.11.dfsg-2+deb11u2",
+                "fixed_vuln": 2
+            },
+            {
+                "current_package_id": "938e6168-b456-5ea5-823a-0c1df50a4709",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libssh2-1@1.9.0-2?arch=amd64&distro=debian-11&upstream=libssh2",
+                "target_component_purl": "pkg:deb/debian/libssh2-1@1.9.0-2+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "3f9e24f2-0266-5e5d-848c-cb1cfbd1b6f1",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/logsave@1.46.2-2?arch=amd64&distro=debian-11&upstream=e2fsprogs",
+                "target_component_purl": "pkg:deb/debian/logsave@1.46.2-2+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "7b62b323-e0fc-5ad7-973f-6fe71b73dc76",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libtiff5@4.2.0-1?arch=amd64&distro=debian-11&upstream=tiff",
+                "target_component_purl": "pkg:deb/debian/libtiff5@4.2.0-1+deb11u3",
+                "fixed_vuln": 35
+            },
+            {
+                "current_package_id": "70289098-f956-5f5e-8106-c7e094127daa",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libtirpc-common@1.3.1-1?arch=all&distro=debian-11&upstream=libtirpc",
+                "target_component_purl": "pkg:deb/debian/libtirpc-common@1.3.1-1+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "c4a01cdb-7c03-5562-a757-d0dbb1de329a",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libtirpc3@1.3.1-1?arch=amd64&distro=debian-11&upstream=libtirpc",
+                "target_component_purl": "pkg:deb/debian/libtirpc3@1.3.1-1+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "ba9c11b7-f1df-5425-8aa1-157b892306f1",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libx11-6@2:1.7.2-1?arch=amd64&distro=debian-11&upstream=libx11",
+                "target_component_purl": "pkg:deb/debian/libx11-6@2:1.7.2-1+deb11u2",
+                "fixed_vuln": 4
+            },
+            {
+                "current_package_id": "da7f9374-b6f9-511a-aa07-fda7818e9417",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/curl@7.74.0-1.3+deb11u1?arch=amd64&distro=debian-11",
+                "target_component_purl": "pkg:deb/debian/curl@7.74.0-1.3+deb11u10",
+                "fixed_vuln": 2
+            },
+            {
+                "current_package_id": "8a66ebb7-6e85-59ae-9810-00e08b77e9ab",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libxslt1.1@1.1.34-4?arch=amd64&distro=debian-11&upstream=libxslt",
+                "target_component_purl": "pkg:deb/debian/libxslt1.1@1.1.34-4+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "2c4380f2-a966-5056-b987-4d2d63c11aa6",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libwebp6@0.6.1-2.1?arch=amd64&distro=debian-11&upstream=libwebp",
+                "target_component_purl": "pkg:deb/debian/libwebp6@0.6.1-2.1+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "6ee9e778-a006-5a24-8d7e-3934dc551590",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/gzip@1.10-4?arch=amd64&distro=debian-11",
+                "target_component_purl": "pkg:deb/debian/gzip@1.10-4+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "1db09835-b69a-59bb-aa27-aecd5cf7d119",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libnghttp2-14@1.43.0-1?arch=amd64&distro=debian-11&upstream=nghttp2",
+                "target_component_purl": "pkg:deb/debian/libnghttp2-14@1.43.0-1+deb11u2",
+                "fixed_vuln": 2
+            },
+            {
+                "current_package_id": "896fdc35-a2c2-5cd3-aad2-b8c7db819fb4",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libx11-data@2:1.7.2-1?arch=all&distro=debian-11&upstream=libx11",
+                "target_component_purl": "pkg:deb/debian/libx11-data@2:1.7.2-1+deb11u2",
+                "fixed_vuln": 4
+            },
+            {
+                "current_package_id": "869a381a-8653-5a8e-91f6-2b36356048d9",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libudev1@247.3-6?arch=amd64&distro=debian-11&upstream=systemd",
+                "target_component_purl": "pkg:deb/debian/libudev1@247.3-7+deb11u6",
+                "fixed_vuln": 6
+            },
+            {
+                "current_package_id": "b3d0e748-4735-587c-9079-a4c5b5454a66",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libcom-err2@1.46.2-2?arch=amd64&distro=debian-11&upstream=e2fsprogs",
+                "target_component_purl": "pkg:deb/debian/libcom-err2@1.46.2-2+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "5084f622-33ef-5d58-9995-a6bdc850a7f3",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libext2fs2@1.46.2-2?arch=amd64&distro=debian-11&upstream=e2fsprogs",
+                "target_component_purl": "pkg:deb/debian/libext2fs2@1.46.2-2+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "9349b6a1-5c50-5a3b-be62-de7015a0a0bc",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libss2@1.46.2-2?arch=amd64&distro=debian-11&upstream=e2fsprogs",
+                "target_component_purl": "pkg:deb/debian/libss2@1.46.2-2+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "9bcab9fc-73ce-5850-9326-171172104390",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libtasn1-6@4.16.0-2?arch=amd64&distro=debian-11",
+                "target_component_purl": "pkg:deb/debian/libtasn1-6@4.16.0-2+deb11u2",
+                "fixed_vuln": 2
+            },
+            {
+                "current_package_id": "56ed40c2-4db2-56f0-93cf-6e84b1eb3dc3",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libpcre2-8-0@10.36-2?arch=amd64&distro=debian-11&upstream=pcre2",
+                "target_component_purl": "pkg:deb/debian/libpcre2-8-0@10.36-2+deb11u1",
+                "fixed_vuln": 2
+            },
+            {
+                "current_package_id": "18924588-b6f2-5fc4-9a45-9067453cdabe",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/liblzma5@5.2.5-2?arch=amd64&distro=debian-11&upstream=xz-utils",
+                "target_component_purl": "pkg:deb/debian/liblzma5@5.2.5-2.1~deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "699adfd4-f4de-5577-b814-692739ae2d5d",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libgnutls30@3.7.1-5?arch=amd64&distro=debian-11&upstream=gnutls28",
+                "target_component_purl": "pkg:deb/debian/libgnutls30@3.7.1-5+deb11u7",
+                "fixed_vuln": 9
+            },
+            {
+                "current_package_id": "a524fdcd-df57-5dbb-bb53-9b37663a47e7",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/perl-base@5.32.1-4%2Bdeb11u2?arch=amd64&distro=debian-11&upstream=perl",
+                "target_component_purl": "pkg:deb/debian/perl-base@5.32.1-4+deb11u4",
+                "fixed_vuln": 3
+            }
+        ],
+        "balanced_plan_components_vulnerability_fixes": [
+            {
+                "current_package_id": "8cf34c01-2e2c-5e85-bf3c-9a6ba98a67fb",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/e2fsprogs@1.46.2-2?arch=amd64&distro=debian-11",
+                "target_component_purl": "pkg:deb/debian/e2fsprogs@1.46.2-2+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "044ec605-fe3a-5369-bb16-3b403e49f66d",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libsystemd0@247.3-6?arch=amd64&distro=debian-11&upstream=systemd",
+                "target_component_purl": "pkg:deb/debian/libsystemd0@247.3-7+deb11u6",
+                "fixed_vuln": 6
+            },
+            {
+                "current_package_id": "248c164d-e4c4-5faf-bed4-d56313377ed2",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/dpkg@1.20.9?arch=amd64&distro=debian-11",
+                "target_component_purl": "pkg:deb/debian/dpkg@1.20.10",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "8794cad8-cdff-5669-bd5a-fa5c48eddb06",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libxpm4@1:3.5.12-1?arch=amd64&distro=debian-11&upstream=libxpm",
+                "target_component_purl": "pkg:deb/debian/libxpm4@1:3.5.12-1.1~deb11u1",
+                "fixed_vuln": 3
+            },
+            {
+                "current_package_id": "e205e0cf-48ab-566c-ba2b-faf73e6f3766",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/bsdutils@1:2.36.1-8?arch=amd64&distro=debian-11&upstream=util-linux%402.36.1-8",
+                "target_component_purl": "pkg:deb/debian/bsdutils@2.36.1-8+deb11u2",
+                "fixed_vuln": 3
+            },
+            {
+                "current_package_id": "ee654ad0-ebd1-5328-a2fe-69e549b52c37",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libexpat1@2.2.10-2?arch=amd64&distro=debian-11&upstream=expat",
+                "target_component_purl": "pkg:deb/debian/libexpat1@2.2.10-2+deb11u6",
+                "fixed_vuln": 21
+            },
+            {
+                "current_package_id": "46a9eebe-6377-54c3-80d7-3e8a0e3bdeb1",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/zlib1g@1:1.2.11.dfsg-2?arch=amd64&distro=debian-11&upstream=zlib",
+                "target_component_purl": "pkg:deb/debian/zlib1g@1:1.2.11.dfsg-2+deb11u2",
+                "fixed_vuln": 2
+            },
+            {
+                "current_package_id": "938e6168-b456-5ea5-823a-0c1df50a4709",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libssh2-1@1.9.0-2?arch=amd64&distro=debian-11&upstream=libssh2",
+                "target_component_purl": "pkg:deb/debian/libssh2-1@1.9.0-2+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "3f9e24f2-0266-5e5d-848c-cb1cfbd1b6f1",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/logsave@1.46.2-2?arch=amd64&distro=debian-11&upstream=e2fsprogs",
+                "target_component_purl": "pkg:deb/debian/logsave@1.46.2-2+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "7b62b323-e0fc-5ad7-973f-6fe71b73dc76",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libtiff5@4.2.0-1?arch=amd64&distro=debian-11&upstream=tiff",
+                "target_component_purl": "pkg:deb/debian/libtiff5@4.2.0-1+deb11u3",
+                "fixed_vuln": 35
+            },
+            {
+                "current_package_id": "70289098-f956-5f5e-8106-c7e094127daa",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libtirpc-common@1.3.1-1?arch=all&distro=debian-11&upstream=libtirpc",
+                "target_component_purl": "pkg:deb/debian/libtirpc-common@1.3.1-1+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "c4a01cdb-7c03-5562-a757-d0dbb1de329a",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libtirpc3@1.3.1-1?arch=amd64&distro=debian-11&upstream=libtirpc",
+                "target_component_purl": "pkg:deb/debian/libtirpc3@1.3.1-1+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "ba9c11b7-f1df-5425-8aa1-157b892306f1",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libx11-6@2:1.7.2-1?arch=amd64&distro=debian-11&upstream=libx11",
+                "target_component_purl": "pkg:deb/debian/libx11-6@2:1.7.2-1+deb11u2",
+                "fixed_vuln": 4
+            },
+            {
+                "current_package_id": "da7f9374-b6f9-511a-aa07-fda7818e9417",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/curl@7.74.0-1.3+deb11u1?arch=amd64&distro=debian-11",
+                "target_component_purl": "pkg:deb/debian/curl@7.88.1-10+deb12u6",
+                "fixed_vuln": 50
+            },
+            {
+                "current_package_id": "8a66ebb7-6e85-59ae-9810-00e08b77e9ab",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libxslt1.1@1.1.34-4?arch=amd64&distro=debian-11&upstream=libxslt",
+                "target_component_purl": "pkg:deb/debian/libxslt1.1@1.1.34-4+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "2c4380f2-a966-5056-b987-4d2d63c11aa6",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libwebp6@0.6.1-2.1?arch=amd64&distro=debian-11&upstream=libwebp",
+                "target_component_purl": "pkg:deb/debian/libwebp6@0.6.1-2.1+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "6ee9e778-a006-5a24-8d7e-3934dc551590",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/gzip@1.10-4?arch=amd64&distro=debian-11",
+                "target_component_purl": "pkg:deb/debian/gzip@1.10-4+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "1db09835-b69a-59bb-aa27-aecd5cf7d119",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libnghttp2-14@1.43.0-1?arch=amd64&distro=debian-11&upstream=nghttp2",
+                "target_component_purl": "pkg:deb/debian/libnghttp2-14@1.43.0-1+deb11u2",
+                "fixed_vuln": 2
+            },
+            {
+                "current_package_id": "896fdc35-a2c2-5cd3-aad2-b8c7db819fb4",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libx11-data@2:1.7.2-1?arch=all&distro=debian-11&upstream=libx11",
+                "target_component_purl": "pkg:deb/debian/libx11-data@2:1.7.2-1+deb11u2",
+                "fixed_vuln": 4
+            },
+            {
+                "current_package_id": "869a381a-8653-5a8e-91f6-2b36356048d9",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libudev1@247.3-6?arch=amd64&distro=debian-11&upstream=systemd",
+                "target_component_purl": "pkg:deb/debian/libudev1@247.3-7+deb11u6",
+                "fixed_vuln": 6
+            },
+            {
+                "current_package_id": "b3d0e748-4735-587c-9079-a4c5b5454a66",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libcom-err2@1.46.2-2?arch=amd64&distro=debian-11&upstream=e2fsprogs",
+                "target_component_purl": "pkg:deb/debian/libcom-err2@1.46.2-2+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "5084f622-33ef-5d58-9995-a6bdc850a7f3",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libext2fs2@1.46.2-2?arch=amd64&distro=debian-11&upstream=e2fsprogs",
+                "target_component_purl": "pkg:deb/debian/libext2fs2@1.46.2-2+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "9349b6a1-5c50-5a3b-be62-de7015a0a0bc",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libss2@1.46.2-2?arch=amd64&distro=debian-11&upstream=e2fsprogs",
+                "target_component_purl": "pkg:deb/debian/libss2@1.46.2-2+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "9bcab9fc-73ce-5850-9326-171172104390",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libtasn1-6@4.16.0-2?arch=amd64&distro=debian-11",
+                "target_component_purl": "pkg:deb/debian/libtasn1-6@4.16.0-2+deb11u2",
+                "fixed_vuln": 2
+            },
+            {
+                "current_package_id": "56ed40c2-4db2-56f0-93cf-6e84b1eb3dc3",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libpcre2-8-0@10.36-2?arch=amd64&distro=debian-11&upstream=pcre2",
+                "target_component_purl": "pkg:deb/debian/libpcre2-8-0@10.36-2+deb11u1",
+                "fixed_vuln": 2
+            },
+            {
+                "current_package_id": "18924588-b6f2-5fc4-9a45-9067453cdabe",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/liblzma5@5.2.5-2?arch=amd64&distro=debian-11&upstream=xz-utils",
+                "target_component_purl": "pkg:deb/debian/liblzma5@5.2.5-2.1~deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "699adfd4-f4de-5577-b814-692739ae2d5d",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libgnutls30@3.7.1-5?arch=amd64&distro=debian-11&upstream=gnutls28",
+                "target_component_purl": "pkg:deb/debian/libgnutls30@3.7.1-5+deb11u7",
+                "fixed_vuln": 9
+            },
+            {
+                "current_package_id": "a524fdcd-df57-5dbb-bb53-9b37663a47e7",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/perl-base@5.32.1-4%2Bdeb11u2?arch=amd64&distro=debian-11&upstream=perl",
+                "target_component_purl": "pkg:deb/debian/perl-base@5.32.1-4+deb11u4",
+                "fixed_vuln": 3
+            }
+        ],
+        "comprehensive_plan_components": [
+            {
+                "current_package_id": "8cf34c01-2e2c-5e85-bf3c-9a6ba98a67fb",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/e2fsprogs@1.46.2-2?arch=amd64&distro=debian-11",
+                "target_component_purl": "pkg:deb/debian/e2fsprogs@1.46.2-2+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "044ec605-fe3a-5369-bb16-3b403e49f66d",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libsystemd0@247.3-6?arch=amd64&distro=debian-11&upstream=systemd",
+                "target_component_purl": "pkg:deb/debian/libsystemd0@247.3-7+deb11u6",
+                "fixed_vuln": 6
+            },
+            {
+                "current_package_id": "248c164d-e4c4-5faf-bed4-d56313377ed2",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/dpkg@1.20.9?arch=amd64&distro=debian-11",
+                "target_component_purl": "pkg:deb/debian/dpkg@1.20.10",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "8794cad8-cdff-5669-bd5a-fa5c48eddb06",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libxpm4@1:3.5.12-1?arch=amd64&distro=debian-11&upstream=libxpm",
+                "target_component_purl": "pkg:deb/debian/libxpm4@1:3.5.12-1.1~deb11u1",
+                "fixed_vuln": 3
+            },
+            {
+                "current_package_id": "e205e0cf-48ab-566c-ba2b-faf73e6f3766",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/bsdutils@1:2.36.1-8?arch=amd64&distro=debian-11&upstream=util-linux%402.36.1-8",
+                "target_component_purl": "pkg:deb/debian/bsdutils@2.36.1-8+deb11u2",
+                "fixed_vuln": 3
+            },
+            {
+                "current_package_id": "ee654ad0-ebd1-5328-a2fe-69e549b52c37",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libexpat1@2.2.10-2?arch=amd64&distro=debian-11&upstream=expat",
+                "target_component_purl": "pkg:deb/debian/libexpat1@2.2.10-2+deb11u6",
+                "fixed_vuln": 21
+            },
+            {
+                "current_package_id": "46a9eebe-6377-54c3-80d7-3e8a0e3bdeb1",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/zlib1g@1:1.2.11.dfsg-2?arch=amd64&distro=debian-11&upstream=zlib",
+                "target_component_purl": "pkg:deb/debian/zlib1g@1:1.2.11.dfsg-2+deb11u2",
+                "fixed_vuln": 2
+            },
+            {
+                "current_package_id": "938e6168-b456-5ea5-823a-0c1df50a4709",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libssh2-1@1.9.0-2?arch=amd64&distro=debian-11&upstream=libssh2",
+                "target_component_purl": "pkg:deb/debian/libssh2-1@1.9.0-2+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "3f9e24f2-0266-5e5d-848c-cb1cfbd1b6f1",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/logsave@1.46.2-2?arch=amd64&distro=debian-11&upstream=e2fsprogs",
+                "target_component_purl": "pkg:deb/debian/logsave@1.46.2-2+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "7b62b323-e0fc-5ad7-973f-6fe71b73dc76",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libtiff5@4.2.0-1?arch=amd64&distro=debian-11&upstream=tiff",
+                "target_component_purl": "pkg:deb/debian/libtiff5@4.2.0-1+deb11u3",
+                "fixed_vuln": 35
+            },
+            {
+                "current_package_id": "70289098-f956-5f5e-8106-c7e094127daa",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libtirpc-common@1.3.1-1?arch=all&distro=debian-11&upstream=libtirpc",
+                "target_component_purl": "pkg:deb/debian/libtirpc-common@1.3.1-1+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "c4a01cdb-7c03-5562-a757-d0dbb1de329a",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libtirpc3@1.3.1-1?arch=amd64&distro=debian-11&upstream=libtirpc",
+                "target_component_purl": "pkg:deb/debian/libtirpc3@1.3.1-1+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "ba9c11b7-f1df-5425-8aa1-157b892306f1",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libx11-6@2:1.7.2-1?arch=amd64&distro=debian-11&upstream=libx11",
+                "target_component_purl": "pkg:deb/debian/libx11-6@2:1.7.2-1+deb11u2",
+                "fixed_vuln": 4
+            },
+            {
+                "current_package_id": "da7f9374-b6f9-511a-aa07-fda7818e9417",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/curl@7.74.0-1.3+deb11u1?arch=amd64&distro=debian-11",
+                "target_component_purl": "pkg:deb/debian/curl@8.9.0-1",
+                "fixed_vuln": 58
+            },
+            {
+                "current_package_id": "8a66ebb7-6e85-59ae-9810-00e08b77e9ab",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libxslt1.1@1.1.34-4?arch=amd64&distro=debian-11&upstream=libxslt",
+                "target_component_purl": "pkg:deb/debian/libxslt1.1@1.1.34-4+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "2c4380f2-a966-5056-b987-4d2d63c11aa6",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libwebp6@0.6.1-2.1?arch=amd64&distro=debian-11&upstream=libwebp",
+                "target_component_purl": "pkg:deb/debian/libwebp6@0.6.1-2.1+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "6ee9e778-a006-5a24-8d7e-3934dc551590",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/gzip@1.10-4?arch=amd64&distro=debian-11",
+                "target_component_purl": "pkg:deb/debian/gzip@1.10-4+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "1db09835-b69a-59bb-aa27-aecd5cf7d119",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libnghttp2-14@1.43.0-1?arch=amd64&distro=debian-11&upstream=nghttp2",
+                "target_component_purl": "pkg:deb/debian/libnghttp2-14@1.43.0-1+deb11u2",
+                "fixed_vuln": 2
+            },
+            {
+                "current_package_id": "896fdc35-a2c2-5cd3-aad2-b8c7db819fb4",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libx11-data@2:1.7.2-1?arch=all&distro=debian-11&upstream=libx11",
+                "target_component_purl": "pkg:deb/debian/libx11-data@2:1.7.2-1+deb11u2",
+                "fixed_vuln": 4
+            },
+            {
+                "current_package_id": "869a381a-8653-5a8e-91f6-2b36356048d9",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libudev1@247.3-6?arch=amd64&distro=debian-11&upstream=systemd",
+                "target_component_purl": "pkg:deb/debian/libudev1@247.3-7+deb11u6",
+                "fixed_vuln": 6
+            },
+            {
+                "current_package_id": "b3d0e748-4735-587c-9079-a4c5b5454a66",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libcom-err2@1.46.2-2?arch=amd64&distro=debian-11&upstream=e2fsprogs",
+                "target_component_purl": "pkg:deb/debian/libcom-err2@1.46.2-2+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "5084f622-33ef-5d58-9995-a6bdc850a7f3",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libext2fs2@1.46.2-2?arch=amd64&distro=debian-11&upstream=e2fsprogs",
+                "target_component_purl": "pkg:deb/debian/libext2fs2@1.46.2-2+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "9349b6a1-5c50-5a3b-be62-de7015a0a0bc",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libss2@1.46.2-2?arch=amd64&distro=debian-11&upstream=e2fsprogs",
+                "target_component_purl": "pkg:deb/debian/libss2@1.46.2-2+deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "9bcab9fc-73ce-5850-9326-171172104390",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libtasn1-6@4.16.0-2?arch=amd64&distro=debian-11",
+                "target_component_purl": "pkg:deb/debian/libtasn1-6@4.16.0-2+deb11u2",
+                "fixed_vuln": 2
+            },
+            {
+                "current_package_id": "56ed40c2-4db2-56f0-93cf-6e84b1eb3dc3",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libpcre2-8-0@10.36-2?arch=amd64&distro=debian-11&upstream=pcre2",
+                "target_component_purl": "pkg:deb/debian/libpcre2-8-0@10.36-2+deb11u1",
+                "fixed_vuln": 2
+            },
+            {
+                "current_package_id": "18924588-b6f2-5fc4-9a45-9067453cdabe",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/liblzma5@5.2.5-2?arch=amd64&distro=debian-11&upstream=xz-utils",
+                "target_component_purl": "pkg:deb/debian/liblzma5@5.2.5-2.1~deb11u1",
+                "fixed_vuln": 1
+            },
+            {
+                "current_package_id": "699adfd4-f4de-5577-b814-692739ae2d5d",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/libgnutls30@3.7.1-5?arch=amd64&distro=debian-11&upstream=gnutls28",
+                "target_component_purl": "pkg:deb/debian/libgnutls30@3.7.1-5+deb11u7",
+                "fixed_vuln": 9
+            },
+            {
+                "current_package_id": "a524fdcd-df57-5dbb-bb53-9b37663a47e7",
+                "current_sbom_id": "SPDXRef-DOCUMENT-vdna_x6w5wmZ9QmkZNwyk-341170-588981",
+                "target_hub_package_id": null,
+                "target_hub_sbom_id": null,
+                "current_component_purl": "pkg:deb/debian/perl-base@5.32.1-4%2Bdeb11u2?arch=amd64&distro=debian-11&upstream=perl",
+                "target_component_purl": "pkg:deb/debian/perl-base@5.32.1-4+deb11u4",
+                "fixed_vuln": 3
+            }
+        ],
+        "basic_plan_inherent_risk_level": 3.7821428571428584,
+        "basic_plan_updated_vulnerability_count": 82,
+        "balanced_plan_inherent_risk_level": 3.7821428571428584,
+        "balanced_plan_updated_vulnerability_count": 34,
+        "comprehensive_plan_inherent_risk_level": 3.6750000000000007,
+        "comprehensive_plan_updated_vulnerability_count": 0
+    },
+    "task_ids": [],
+    "column": null,
+    "view_schema": null,
+    "Greeting": null,
+    "guid": null,
+    "message": "",
+    "workflow_id": null,
+    "error": false,
+    "image_details": {
+        "platform": "ecr",
+        "image_repository": "public.ecr.aws/nginx",
+        "image_name": "nginx",
+        "image_version": "1.21.4-amd64",
+        "image_digest": "sha256:2e87d9ff130deb0c2d63600390c3f2370e71e71841573990d54579bc35046203",
+        "private": false
+    }
+}

@@ -13,6 +13,7 @@ import (
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/google/go-containerregistry/pkg/v1/types"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
+	"github.com/project-copacetic/copacetic/pkg/types/unversioned"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -41,6 +42,17 @@ func (m *mockRemote) Get(ref name.Reference, opts ...remote.Option) (*remote.Des
 	desc, _ := args.Get(0).(*remote.Descriptor)
 	return desc, args.Error(1)
 }
+
+var (
+	imageDetail = unversioned.ImageDetail{
+		Platform:        "docker-hub",
+		ImageRepository: "docker.io",
+		ImageName:       "alpine",
+		ImageVersion:    "latest",
+		ImageDigest:     "",
+		Private:         false,
+	}
+)
 
 func TestLocalMediaType(t *testing.T) {
 	md := new(mockDockerClient)
@@ -80,6 +92,7 @@ func TestLocalMediaTypeFailure(t *testing.T) {
 }
 
 func TestRemoteMediaType_Success(t *testing.T) {
+	ctx := context.Background()
 	mr := new(mockRemote)
 	fakeRemoteType := types.MediaType("application/vnd.oci.image.config.v1+json")
 	mr.On("Get", mock.Anything, mock.Anything).Return(
@@ -93,12 +106,13 @@ func TestRemoteMediaType_Success(t *testing.T) {
 		return mr.Get(ref, opts...)
 	}
 
-	mt, err := remoteMediaType("alpine:latest")
+	mt, err := remoteMediaType(ctx, "alpine:latest", imageDetail)
 	require.NoError(t, err)
 	require.Equal(t, string(fakeRemoteType), mt)
 }
 
 func TestRemoteMediaType_Failure(t *testing.T) {
+	ctx := context.Background()
 	mr := new(mockRemote)
 	mr.On("Get", mock.Anything, mock.Anything).Return(nil, errors.New("network down"))
 
@@ -108,11 +122,12 @@ func TestRemoteMediaType_Failure(t *testing.T) {
 		return mr.Get(ref, opts...)
 	}
 
-	_, err := remoteMediaType("alpine:latest")
+	_, err := remoteMediaType(ctx, "alpine:latest", imageDetail)
 	require.Error(t, err)
 }
 
 func TestGetMediaType_LocalSuccess(t *testing.T) {
+	ctx := context.Background()
 	md := new(mockDockerClient)
 	fakeLocalType := "application/vnd.docker.distribution.manifest.v2+json"
 	md.On("ImageInspect", mock.Anything, "alpine:latest", mock.Anything).Return(
@@ -128,12 +143,13 @@ func TestGetMediaType_LocalSuccess(t *testing.T) {
 	defer func() { newClient = origNewClient }()
 	newClient = func() (dockerClient.APIClient, error) { return md, nil }
 
-	mt, err := GetMediaType("alpine:latest")
+	mt, err := GetMediaType(ctx, "alpine:latest", imageDetail)
 	require.NoError(t, err)
 	require.Equal(t, fakeLocalType, mt)
 }
 
 func TestGetMediaType_RemoteFallback(t *testing.T) {
+	ctx := context.Background()
 	// Force local lookup to fail
 	md := new(mockDockerClient)
 	md.On("ImageInspect", mock.Anything, "alpine:latest", mock.Anything).Return(
@@ -159,7 +175,7 @@ func TestGetMediaType_RemoteFallback(t *testing.T) {
 		return mr.Get(ref, opts...)
 	}
 
-	mt, err := GetMediaType("alpine:latest")
+	mt, err := GetMediaType(ctx, "alpine:latest", imageDetail)
 	require.NoError(t, err)
 	require.Equal(t, string(fakeRemoteType), mt)
 }

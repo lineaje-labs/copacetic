@@ -16,15 +16,17 @@ import (
 	"github.com/project-copacetic/copacetic/pkg/patch"
 )
 
-func ValidateIntegrationTest(t *testing.T, tt Test, ctx context.Context, wd string, comparer VersionComparer) {
+func ValidateIntegrationTest(t *testing.T, tt Test, ctx context.Context, wd string) {
 
-	// Pull the container images to make patching easier to test
-	container, err := setupTestContainer(ctx, tt.TestContainerName, tt.ReusableContainerName)
-	if err != nil {
-		t.Fatal(err)
+	// If Setup test container is set then pull the container images to make patching easier to test
+	if tt.SetupTestContainer {
+		container, err := setupTestContainer(ctx, tt.TestContainerName, tt.ReusableContainerName)
+		if err != nil {
+			t.Fatal(err)
+		}
+		// Clean up the container after the test is complete
+		defer container.Terminate(ctx)
 	}
-	// Clean up the container after the test is complete
-	defer container.Terminate(ctx)
 
 	inputFileFullPath := filepath.Join(wd, tt.InputFilePath)
 	expectedOutputFileFullPath := filepath.Join(wd, tt.ExpectedOutputFilePath)
@@ -38,7 +40,7 @@ func ValidateIntegrationTest(t *testing.T, tt Test, ctx context.Context, wd stri
 	cmd.SetArgs(tt.Args)
 
 	// Run the command and capture the output
-	err = cmd.Execute()
+	err := cmd.Execute()
 	if err != nil {
 		t.Errorf("Error: %v", err)
 	}
@@ -139,13 +141,13 @@ func ValidateIntegrationTest(t *testing.T, tt Test, ctx context.Context, wd stri
 				return
 			}
 
-			if !comparer.IsValid(actualPackageUrl.Version) {
+			if !tt.VersionComparer.IsValid(actualPackageUrl.Version) {
 				t.Errorf("Invalid version %s found for package %s with PURL %s", actualPackageUrl.Version, actualPackageUrl.Name, actualPatchOutputReport.PatchesApplied[i].FixedPURL)
 				t.Errorf("Mismatch in patches_applied:\nExpected output file path: %v\nActual output file path:   %v", expectedOutputFileFullPath, actualOutputFileFullPath)
 				return
 			}
 
-			if comparer.LessThan(actualPackageUrl.Version, expectedPackageUrl.Version) {
+			if tt.VersionComparer.LessThan(actualPackageUrl.Version, expectedPackageUrl.Version) {
 				// we encountered case 2.
 				t.Errorf("Installed package %s version %s lower than required %s for update", actualPackageUrl.Name, actualPackageUrl.Version, expectedPackageUrl.Version)
 				t.Errorf("Mismatch in patches_applied:\nExpected output file path: %v\nActual output file path:   %v", expectedOutputFileFullPath, actualOutputFileFullPath)
