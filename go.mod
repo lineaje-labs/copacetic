@@ -36,7 +36,6 @@ require (
 
 require (
 	dario.cat/mergo v1.0.1 // indirect
-	github.com/docker/go v1.5.1-1 // indirect
 	github.com/ebitengine/purego v0.8.2 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20240226150601-1dcf7310316a // indirect
@@ -160,4 +159,4 @@ require (
 	k8s.io/utils v0.0.0-20241104100929-3ea5e8cea738 // indirect
 )
 
-replace github.com/project-copacetic/copacetic => github.com/lineaje-labs/copacetic v0.10.0-lineaje-02
+replace github.com/project-copacetic/copacetic => ./
